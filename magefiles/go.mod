@@ -1,4 +1,4 @@
-module github.com/aserto-dev/template-lib-go/magefiles
+module github.com/aserto-dev/go-directory-cli/magefiles
 
 go 1.17
 
