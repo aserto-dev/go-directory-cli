@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 
 	dsc "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
@@ -11,17 +10,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Loader struct {
-	Objects   []*dsc.Object   `json:"objects"`
-	Relations []*dsc.Relation `json:"relations"`
+type Importer struct {
+	Objects       []*dsc.Object       `json:"objects"`
+	Relations     []*dsc.Relation     `json:"relations"`
+	Permissions   []*dsc.Permission   `json:"permissions"`
+	ObjectTypes   []*dsc.ObjectType   `json:"object_types"`
+	RelationTypes []*dsc.RelationType `json:"relation_types"`
 }
 
 func (c *Client) Import(ctx context.Context, files []string) error {
-	var data []Loader
+	var data []Importer
 
 	// read all files
 	for _, file := range files {
-		var loader Loader
+		var loader Importer
 		c.UI.Normal().Msgf("Reading file %s", file)
 		b, err := os.ReadFile(file)
 		if err != nil {
@@ -34,10 +36,50 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 		data = append(data, loader)
 	}
 
+	// import all object types
+	c.UI.Normal().Msg("Importing object types...")
+	for _, d := range data {
+		for _, ot := range d.ObjectTypes {
+			resp, err := c.Writer.SetObjectType(ctx, &dsw.SetObjectTypeRequest{ObjectType: ot})
+			if err != nil {
+				return err
+			}
+			c.UI.Normal().Msgf("Imported %s", resp.Result.Name)
+		}
+	}
+
+	// import all permissions
+	c.UI.Normal().Msg("Importing permissions...")
+	for _, d := range data {
+		for _, p := range d.Permissions {
+			resp, err := c.Writer.SetPermission(ctx, &dsw.SetPermissionRequest{Permission: p})
+			if err != nil {
+				return err
+			}
+			c.UI.Normal().Msgf("Imported %s:%s",
+				resp.Result.Id,
+				resp.Result.Name,
+			)
+		}
+	}
+
+	// import all relation types
+	c.UI.Normal().Msg("Importing relation types...")
+	for _, d := range data {
+		for _, p := range d.RelationTypes {
+			resp, err := c.Writer.SetRelationType(ctx, &dsw.SetRelationTypeRequest{RelationType: p})
+			if err != nil {
+				return err
+			}
+			c.UI.Normal().Msgf("Imported %s", resp.Result.Name)
+		}
+	}
+
 	// import all objects
-	fmt.Fprint(c.UI.Output(), "Importing objects...\n")
+	c.UI.Normal().Msg("Importing objects...")
 	for _, d := range data {
 		for _, object := range d.Objects {
+			object.Id = ""
 			resp, err := c.Writer.SetObject(ctx, &dsw.SetObjectRequest{Object: object})
 			if err != nil {
 				return err
@@ -47,7 +89,7 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 	}
 
 	// import all relations
-	fmt.Fprint(c.UI.Output(), "Importing relations...\n")
+	c.UI.Normal().Msg("Importing relations...")
 	for _, d := range data {
 		for _, relation := range d.Relations {
 			resp, err := c.Writer.SetRelation(ctx, &dsw.SetRelationRequest{Relation: relation})
