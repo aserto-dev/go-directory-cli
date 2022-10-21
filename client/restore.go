@@ -14,10 +14,6 @@ import (
 	dsw "github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
 )
 
-type RestoreCmd struct {
-	File string `default:"backup.tar.gz"`
-}
-
 func (c *Client) Restore(ctx context.Context, file string) error {
 
 	tf, err := os.Open(file)
