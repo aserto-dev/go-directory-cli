@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/aserto-dev/aserto-go v0.8.13
 	github.com/aserto-dev/clui v0.8.1
-	github.com/aserto-dev/go-directory v0.0.15
+	github.com/aserto-dev/go-directory v0.20.0
 	github.com/magefile/mage v1.14.0
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.28.1
