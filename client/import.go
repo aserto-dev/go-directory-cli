@@ -37,32 +37,27 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 	// import all objects
 	fmt.Fprint(c.UI.Output(), "Importing objects...\n")
 	for _, d := range data {
-		for _, object := range d.Objects {
-			resp, err := c.Writer.SetObject(ctx, &dsw.SetObjectRequest{Object: object})
+		for i, object := range d.Objects {
+			_, err := c.Writer.SetObject(ctx, &dsw.SetObjectRequest{Object: object})
 			if err != nil {
 				return err
 			}
-			c.UI.Normal().Msgf("Imported %s:%s", resp.Result.Type, resp.Result.Id)
+			fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "objects:", i+1)
 		}
+		fmt.Fprintln(c.UI.Output())
 	}
 
 	// import all relations
 	fmt.Fprint(c.UI.Output(), "Importing relations...\n")
-	for _, d := range data {
+	for i, d := range data {
 		for _, relation := range d.Relations {
-			resp, err := c.Writer.SetRelation(ctx, &dsw.SetRelationRequest{Relation: relation})
+			_, err := c.Writer.SetRelation(ctx, &dsw.SetRelationRequest{Relation: relation})
 			if err != nil {
 				return err
 			}
-			c.UI.Normal().Msgf("Imported %s:%s|%s:%s|%s|%s",
-				resp.Result.Subject.GetType(),
-				resp.Result.Subject.GetId(),
-				resp.Result.Object.GetType(),
-				resp.Result.Relation,
-				resp.Result.Object.GetType(),
-				resp.Result.Object.GetId(),
-			)
+			fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "relations:", i+1)
 		}
+		fmt.Fprintln(c.UI.Output())
 	}
 
 	return nil

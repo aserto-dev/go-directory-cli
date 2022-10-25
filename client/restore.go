@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -88,8 +89,9 @@ func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader) error {
 	objTypes, _ := js.NewArrayReader(r)
 	defer objTypes.Close()
 
-	c.UI.Normal().Msg("Loading object types")
 	var m dsc.ObjectType
+
+	counter := 0
 	for {
 		err := objTypes.Read(&m)
 		if err == io.EOF {
@@ -105,8 +107,11 @@ func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
-
+		counter++
+		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "object types:", counter)
 	}
+	fmt.Fprintln(c.UI.Output())
+
 	return nil
 }
 
@@ -114,8 +119,9 @@ func (c *Client) loadPermissions(ctx context.Context, r io.Reader) error {
 	permissions, _ := js.NewArrayReader(r)
 	defer permissions.Close()
 
-	c.UI.Normal().Msg("Loading pemissions")
 	var m dsc.Permission
+
+	counter := 0
 	for {
 		err := permissions.Read(&m)
 		if err == io.EOF {
@@ -131,8 +137,11 @@ func (c *Client) loadPermissions(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
-
+		counter++
+		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "permissions:", counter)
 	}
+	fmt.Fprintln(c.UI.Output())
+
 	return nil
 }
 
@@ -140,8 +149,9 @@ func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader) error {
 	relTypes, _ := js.NewArrayReader(r)
 	defer relTypes.Close()
 
-	c.UI.Normal().Msg("Loading relation types")
 	var m dsc.RelationType
+
+	counter := 0
 	for {
 		err := relTypes.Read(&m)
 		if err == io.EOF {
@@ -157,7 +167,11 @@ func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
+		counter++
+		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "relation types:", counter)
 	}
+	fmt.Fprintln(c.UI.Output())
+
 	return nil
 }
 
@@ -165,8 +179,9 @@ func (c *Client) loadObjects(ctx context.Context, r io.Reader) error {
 	objects, _ := js.NewArrayReader(r)
 	defer objects.Close()
 
-	c.UI.Normal().Msg("Loading objects")
 	var m dsc.Object
+
+	counter := 0
 	for {
 		err := objects.Read(&m)
 		if err == io.EOF {
@@ -182,8 +197,11 @@ func (c *Client) loadObjects(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
-
+		counter++
+		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "objects:", counter)
 	}
+	fmt.Fprintln(c.UI.Output())
+
 	return nil
 }
 
@@ -191,8 +209,9 @@ func (c *Client) loadRelations(ctx context.Context, r io.Reader) error {
 	relations, _ := js.NewArrayReader(r)
 	defer relations.Close()
 
-	c.UI.Normal().Msg("Loading relations")
 	var m dsc.Relation
+
+	counter := 0
 	for {
 		err := relations.Read(&m)
 		if err == io.EOF {
@@ -208,10 +227,10 @@ func (c *Client) loadRelations(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
-
-		if err != nil {
-			return err
-		}
+		counter++
+		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "relations:", counter)
 	}
+	fmt.Fprintln(c.UI.Output())
+
 	return nil
 }
