@@ -2,63 +2,64 @@ package client
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/aserto-dev/go-directory-cli/counter"
-	dsc "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
-	dsw "github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
+	"github.com/aserto-dev/go-directory-cli/js"
 	"github.com/pkg/errors"
 )
 
-type Loader struct {
-	Objects   []*dsc.Object   `json:"objects"`
-	Relations []*dsc.Relation `json:"relations"`
-}
-
 func (c *Client) Import(ctx context.Context, files []string) error {
-	var data []Loader
 
 	ctr := counter.New()
 
 	// read all files
 	for _, file := range files {
-		var loader Loader
 		c.UI.Normal().Msgf("Reading file %s", file)
-		b, err := os.ReadFile(file)
+
+		var objectType string
+		reader, err := js.NewReader(file)
 		if err != nil {
-			return errors.Wrapf(err, "failed to read file: [%s]", file)
-		}
-		if err := json.Unmarshal(b, &loader); err != nil {
-			return errors.Wrapf(err, "failed unmarshal file: [%s]", file)
+			c.UI.Problem().Msgf("Skipping file [%s]: [%s]", file, err.Error())
 		}
 
-		data = append(data, loader)
-	}
+		if reader != nil {
+			objectType = reader.GetObjectType()
+		} else {
+			basePath := filepath.Base(file)
+			switch basePath {
+			case ObjectsFileName:
+				objectType = ObjectsStr
 
-	// import all objects
-	fmt.Fprint(c.UI.Output(), "Importing objects...\n")
-	for _, d := range data {
-		for _, object := range d.Objects {
-			_, err := c.Writer.SetObject(ctx, &dsw.SetObjectRequest{Object: object})
+			case RelationsFileName:
+				objectType = RelationsStr
+			default:
+				return errors.New("files objects.json|relations.json or json root key not found")
+			}
+			b, err := os.Open(file)
 			if err != nil {
+				return errors.Wrapf(err, "failed to open file: [%s]", file)
+			}
+			reader, err = js.NewArrayReader(b)
+			if err != nil {
+				c.UI.Problem().Msgf("Skipping file [%s]: [%s]", file, err.Error())
+			}
+		}
+
+		switch objectType {
+		case ObjectsStr:
+			if err := c.loadObjects(ctx, reader, ctr.Objects); err != nil {
 				return err
 			}
-			ctr.Objects.Incr().Print(c.UI.Output())
-		}
-		fmt.Fprintln(c.UI.Output())
-	}
 
-	// import all relations
-	fmt.Fprint(c.UI.Output(), "Importing relations...\n")
-	for _, d := range data {
-		for _, relation := range d.Relations {
-			_, err := c.Writer.SetRelation(ctx, &dsw.SetRelationRequest{Relation: relation})
-			if err != nil {
+		case RelationsStr:
+			if err := c.loadRelations(ctx, reader, ctr.Relations); err != nil {
 				return err
 			}
-			ctr.Relations.Incr().Print(c.UI.Output())
+		default:
+			return errors.Errorf("invalid object type: [%s]", objectType)
 		}
 		fmt.Fprintln(c.UI.Output())
 	}

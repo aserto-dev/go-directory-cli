@@ -51,27 +51,32 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 		name := path.Clean(header.Name)
 		switch name {
 		case "object_types.json":
-			if err := c.loadObjectTypes(ctx, tr, ctr.ObjectTypes); err != nil {
+			r, _ := js.NewArrayReader(tr)
+			if err := c.loadObjectTypes(ctx, r, ctr.ObjectTypes); err != nil {
 				return err
 			}
 
 		case "permissions.json":
-			if err := c.loadPermissions(ctx, tr, ctr.Permissions); err != nil {
+			r, _ := js.NewArrayReader(tr)
+			if err := c.loadPermissions(ctx, r, ctr.Permissions); err != nil {
 				return err
 			}
 
 		case "relation_types.json":
-			if err := c.loadRelationTypes(ctx, tr, ctr.RelationTypes); err != nil {
+			r, _ := js.NewArrayReader(tr)
+			if err := c.loadRelationTypes(ctx, r, ctr.RelationTypes); err != nil {
 				return err
 			}
 
 		case "objects.json":
-			if err := c.loadObjects(ctx, tr, ctr.Objects); err != nil {
+			r, _ := js.NewArrayReader(tr)
+			if err := c.loadObjects(ctx, r, ctr.Objects); err != nil {
 				return err
 			}
 
 		case "relations.json":
-			if err := c.loadRelations(ctx, tr, ctr.Relations); err != nil {
+			r, _ := js.NewArrayReader(tr)
+			if err := c.loadRelations(ctx, r, ctr.Relations); err != nil {
 				return err
 			}
 
@@ -87,8 +92,7 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 	return nil
 }
 
-func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader, ctr *counter.Item) error {
-	objTypes, _ := js.NewArrayReader(r)
+func (c *Client) loadObjectTypes(ctx context.Context, objTypes js.Reader, ctr *counter.Item) error {
 	defer objTypes.Close()
 
 	var m dsc.ObjectType
@@ -114,8 +118,7 @@ func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader, ctr *counter.
 	return nil
 }
 
-func (c *Client) loadPermissions(ctx context.Context, r io.Reader, ctr *counter.Item) error {
-	permissions, _ := js.NewArrayReader(r)
+func (c *Client) loadPermissions(ctx context.Context, permissions js.Reader, ctr *counter.Item) error {
 	defer permissions.Close()
 
 	var m dsc.Permission
@@ -141,8 +144,7 @@ func (c *Client) loadPermissions(ctx context.Context, r io.Reader, ctr *counter.
 	return nil
 }
 
-func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader, ctr *counter.Item) error {
-	relTypes, _ := js.NewArrayReader(r)
+func (c *Client) loadRelationTypes(ctx context.Context, relTypes js.Reader, ctr *counter.Item) error {
 	defer relTypes.Close()
 
 	var m dsc.RelationType
@@ -168,8 +170,7 @@ func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader, ctr *counte
 	return nil
 }
 
-func (c *Client) loadObjects(ctx context.Context, r io.Reader, ctr *counter.Item) error {
-	objects, _ := js.NewArrayReader(r)
+func (c *Client) loadObjects(ctx context.Context, objects js.Reader, ctr *counter.Item) error {
 	defer objects.Close()
 
 	var m dsc.Object
@@ -195,8 +196,7 @@ func (c *Client) loadObjects(ctx context.Context, r io.Reader, ctr *counter.Item
 	return nil
 }
 
-func (c *Client) loadRelations(ctx context.Context, r io.Reader, ctr *counter.Item) error {
-	relations, _ := js.NewArrayReader(r)
+func (c *Client) loadRelations(ctx context.Context, relations js.Reader, ctr *counter.Item) error {
 	defer relations.Close()
 
 	var m dsc.Relation

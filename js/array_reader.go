@@ -14,7 +14,7 @@ type ArrayReader struct {
 	first bool
 }
 
-func NewArrayReader(r io.Reader) (*ArrayReader, error) {
+func NewArrayReader(r io.Reader) (Reader, error) {
 
 	dec := json.NewDecoder(r)
 
@@ -43,4 +43,8 @@ func (r *ArrayReader) Read(m proto.Message) error {
 		return err
 	}
 	return nil
+}
+
+func (r *ArrayReader) GetObjectType() string {
+	return ""
 }
