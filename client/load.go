@@ -18,7 +18,7 @@ type Manifest map[string]ObjectRelation
 
 func (c *Client) Load(ctx context.Context, file string) error {
 
-	c.UI.Normal().Msgf("Reading manifest %s", file)
+	c.UI.Normal().Msgf("Reading manifest [%s]", file)
 
 	yfile, err := os.ReadFile(file)
 
