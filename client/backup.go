@@ -4,9 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
-	"fmt"
 	"io"
-	"log"
 	"os"
 	"path"
 
@@ -30,7 +28,7 @@ func (c *Client) Backup(ctx context.Context, file string) error {
 		return err
 	}
 	defer func() {
-		fmt.Println("delete tmpDir", tmpDir)
+		c.UI.Normal().Msgf("Deleting temporary dir [%s]", tmpDir)
 		_ = os.RemoveAll(tmpDir)
 	}()
 
@@ -39,7 +37,7 @@ func (c *Client) Backup(ctx context.Context, file string) error {
 		return err
 	}
 
-	if err := createBackupFiles(stream, dirPath); err != nil {
+	if err := c.createBackupFiles(stream, dirPath); err != nil {
 		return err
 	}
 
@@ -48,7 +46,7 @@ func (c *Client) Backup(ctx context.Context, file string) error {
 		return nil
 	}
 	defer func() {
-		fmt.Println("close tar file", file)
+		c.UI.Normal().Msgf("Closing tar file [%s]", file)
 		tf.Close()
 	}()
 
@@ -57,13 +55,13 @@ func (c *Client) Backup(ctx context.Context, file string) error {
 		return nil
 	}
 	defer func() {
-		fmt.Println("close gzip writer")
+		c.UI.Normal().Msg("Closing gzip writer")
 		gw.Close()
 	}()
 
 	tw := tar.NewWriter(gw)
 	defer func() {
-		fmt.Println("close tar writer")
+		c.UI.Normal().Msg("Closing tar writer")
 		tw.Close()
 	}()
 
@@ -104,7 +102,7 @@ func addToArchive(tw *tar.Writer, filename string) error {
 	return nil
 }
 
-func createBackupFiles(stream dse.Exporter_ExportClient, dirPath string) error {
+func (c *Client) createBackupFiles(stream dse.Exporter_ExportClient, dirPath string) error {
 	objTypes, _ := js.NewArrayWriter(path.Join(dirPath, "object_types.json"))
 	defer objTypes.Close()
 
@@ -126,7 +124,6 @@ func createBackupFiles(stream dse.Exporter_ExportClient, dirPath string) error {
 			break
 		}
 		if err != nil {
-			log.Printf("err: %v", err)
 			return err
 		}
 
@@ -147,11 +144,11 @@ func createBackupFiles(stream dse.Exporter_ExportClient, dirPath string) error {
 			err = relations.Write(m.Relation)
 
 		default:
-			log.Printf("unknown message type")
+			c.UI.Exclamation().Msg("Unknown message type")
 		}
 
 		if err != nil {
-			log.Printf("err: %v", err)
+			c.UI.Problem().Msgf("Error: %v", err)
 		}
 	}
 
