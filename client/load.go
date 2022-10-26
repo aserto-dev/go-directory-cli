@@ -49,7 +49,9 @@ func (c *Client) Load(ctx context.Context, file string) error {
 		}
 		for relationType, data := range manifestEntry {
 			// at first we create relation types that don't have unions
-			if !(data["union"] != nil && len(data["union"]) == 1 && data["union"][0] == "~") {
+			if len(data["union"]) > 0 {
+				manifestEntriesWithUnions[relationType] = data
+			} else {
 				err := c.setPermissions(data["permissions"], permissions)
 				if err != nil {
 					return errors.Wrapf(err, "failed to set permissions for relation %s", relationType)
@@ -65,8 +67,6 @@ func (c *Client) Load(ctx context.Context, file string) error {
 				if err != nil {
 					return errors.Wrapf(err, "failed to set relation type %s", relationType)
 				}
-			} else {
-				manifestEntriesWithUnions[relationType] = data
 			}
 		}
 
