@@ -4,11 +4,11 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"path"
 
+	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
 	dsc "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
 	dsw "github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
@@ -16,7 +16,6 @@ import (
 
 func (c *Client) Restore(ctx context.Context, file string) error {
 
-	c.UI.Normal().Msgf("Reading file %s", file)
 	tf, err := os.Open(file)
 	if err != nil {
 		return err
@@ -30,6 +29,9 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 	defer gz.Close()
 
 	tr := tar.NewReader(gz)
+
+	ctr := counter.New()
+	defer ctr.Print(c.UI.Output())
 
 	var stop bool
 	for {
@@ -49,27 +51,27 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 		name := path.Clean(header.Name)
 		switch name {
 		case "object_types.json":
-			if err := c.loadObjectTypes(ctx, tr); err != nil {
+			if err := c.loadObjectTypes(ctx, tr, ctr.ObjectTypes); err != nil {
 				return err
 			}
 
 		case "permissions.json":
-			if err := c.loadPermissions(ctx, tr); err != nil {
+			if err := c.loadPermissions(ctx, tr, ctr.Permissions); err != nil {
 				return err
 			}
 
 		case "relation_types.json":
-			if err := c.loadRelationTypes(ctx, tr); err != nil {
+			if err := c.loadRelationTypes(ctx, tr, ctr.RelationTypes); err != nil {
 				return err
 			}
 
 		case "objects.json":
-			if err := c.loadObjects(ctx, tr); err != nil {
+			if err := c.loadObjects(ctx, tr, ctr.Objects); err != nil {
 				return err
 			}
 
 		case "relations.json":
-			if err := c.loadRelations(ctx, tr); err != nil {
+			if err := c.loadRelations(ctx, tr, ctr.Relations); err != nil {
 				return err
 			}
 
@@ -85,13 +87,12 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 	return nil
 }
 
-func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader) error {
+func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	objTypes, _ := js.NewArrayReader(r)
 	defer objTypes.Close()
 
 	var m dsc.ObjectType
 
-	counter := 0
 	for {
 		err := objTypes.Read(&m)
 		if err == io.EOF {
@@ -107,21 +108,18 @@ func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
-		counter++
-		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "object types:", counter)
+		ctr.Incr().Print(c.UI.Output())
 	}
-	fmt.Fprintln(c.UI.Output())
 
 	return nil
 }
 
-func (c *Client) loadPermissions(ctx context.Context, r io.Reader) error {
+func (c *Client) loadPermissions(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	permissions, _ := js.NewArrayReader(r)
 	defer permissions.Close()
 
 	var m dsc.Permission
 
-	counter := 0
 	for {
 		err := permissions.Read(&m)
 		if err == io.EOF {
@@ -137,21 +135,18 @@ func (c *Client) loadPermissions(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
-		counter++
-		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "permissions:", counter)
+		ctr.Incr().Print(c.UI.Output())
 	}
-	fmt.Fprintln(c.UI.Output())
 
 	return nil
 }
 
-func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader) error {
+func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	relTypes, _ := js.NewArrayReader(r)
 	defer relTypes.Close()
 
 	var m dsc.RelationType
 
-	counter := 0
 	for {
 		err := relTypes.Read(&m)
 		if err == io.EOF {
@@ -167,21 +162,18 @@ func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
-		counter++
-		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "relation types:", counter)
+		ctr.Incr().Print(c.UI.Output())
 	}
-	fmt.Fprintln(c.UI.Output())
 
 	return nil
 }
 
-func (c *Client) loadObjects(ctx context.Context, r io.Reader) error {
+func (c *Client) loadObjects(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	objects, _ := js.NewArrayReader(r)
 	defer objects.Close()
 
 	var m dsc.Object
 
-	counter := 0
 	for {
 		err := objects.Read(&m)
 		if err == io.EOF {
@@ -197,21 +189,18 @@ func (c *Client) loadObjects(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
-		counter++
-		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "objects:", counter)
+		ctr.Incr().Print(c.UI.Output())
 	}
-	fmt.Fprintln(c.UI.Output())
 
 	return nil
 }
 
-func (c *Client) loadRelations(ctx context.Context, r io.Reader) error {
+func (c *Client) loadRelations(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	relations, _ := js.NewArrayReader(r)
 	defer relations.Close()
 
 	var m dsc.Relation
 
-	counter := 0
 	for {
 		err := relations.Read(&m)
 		if err == io.EOF {
@@ -227,10 +216,8 @@ func (c *Client) loadRelations(ctx context.Context, r io.Reader) error {
 		if err != nil {
 			return err
 		}
-		counter++
-		fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "relations:", counter)
+		ctr.Incr().Print(c.UI.Output())
 	}
-	fmt.Fprintln(c.UI.Output())
 
 	return nil
 }

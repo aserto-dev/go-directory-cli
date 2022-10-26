@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/aserto-dev/go-directory-cli/counter"
 	dsc "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
 	dsw "github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
 	"github.com/pkg/errors"
@@ -18,6 +19,8 @@ type Loader struct {
 
 func (c *Client) Import(ctx context.Context, files []string) error {
 	var data []Loader
+
+	ctr := counter.New()
 
 	// read all files
 	for _, file := range files {
@@ -37,28 +40,30 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 	// import all objects
 	fmt.Fprint(c.UI.Output(), "Importing objects...\n")
 	for _, d := range data {
-		for i, object := range d.Objects {
+		for _, object := range d.Objects {
 			_, err := c.Writer.SetObject(ctx, &dsw.SetObjectRequest{Object: object})
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "objects:", i+1)
+			ctr.Objects.Incr().Print(c.UI.Output())
 		}
 		fmt.Fprintln(c.UI.Output())
 	}
 
 	// import all relations
 	fmt.Fprint(c.UI.Output(), "Importing relations...\n")
-	for i, d := range data {
+	for _, d := range data {
 		for _, relation := range d.Relations {
 			_, err := c.Writer.SetRelation(ctx, &dsw.SetRelationRequest{Relation: relation})
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(c.UI.Output(), "\033[2K\r%15s %d", "relations:", i+1)
+			ctr.Relations.Incr().Print(c.UI.Output())
 		}
 		fmt.Fprintln(c.UI.Output())
 	}
+
+	ctr.Print(c.UI.Output())
 
 	return nil
 }
