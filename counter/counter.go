@@ -3,7 +3,10 @@ package counter
 import (
 	"fmt"
 	"io"
+	"os"
 	"sync/atomic"
+
+	"github.com/mattn/go-isatty"
 )
 
 type Counter struct {
@@ -35,11 +38,15 @@ func (c *Item) Incr() *Item {
 }
 
 func (c *Item) Print(w io.Writer) {
-	fmt.Fprintf(w, "\033[2K\r%15s: %d", c.Name, c.value)
+	if isatty.IsTerminal(os.Stdout.Fd()) {
+		fmt.Fprintf(w, "\033[2K\r%15s: %d", c.Name, c.value)
+	}
 }
 
 func (c *Counter) Print(w io.Writer) {
-	fmt.Fprintf(w, "\033[2K\r")
+	if isatty.IsTerminal(os.Stdout.Fd()) {
+		fmt.Fprintf(w, "\033[2K\r")
+	}
 	fmt.Fprintf(w, "%15s %d\n", "object types:", c.ObjectTypes.value)
 	fmt.Fprintf(w, "%15s %d\n", "permissions:", c.Permissions.value)
 	fmt.Fprintf(w, "%15s %d\n", "relation types:", c.RelationTypes.value)
