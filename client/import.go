@@ -20,7 +20,7 @@ type Loader struct {
 func (c *Client) Import(ctx context.Context, files []string) error {
 	var data []Loader
 
-	counter := counter.New()
+	ctr := counter.New()
 
 	// read all files
 	for _, file := range files {
@@ -45,7 +45,7 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 			if err != nil {
 				return err
 			}
-			counter.Objects.Incr().Print(c.UI.Output())
+			ctr.Objects.Incr().Print(c.UI.Output())
 		}
 		fmt.Fprintln(c.UI.Output())
 	}
@@ -58,12 +58,12 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 			if err != nil {
 				return err
 			}
-			counter.Relations.Incr().Print(c.UI.Output())
+			ctr.Relations.Incr().Print(c.UI.Output())
 		}
 		fmt.Fprintln(c.UI.Output())
 	}
 
-	counter.Print(c.UI.Output())
+	ctr.Print(c.UI.Output())
 
 	return nil
 }

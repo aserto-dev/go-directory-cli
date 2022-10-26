@@ -30,8 +30,8 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 
 	tr := tar.NewReader(gz)
 
-	counter := counter.New()
-	defer counter.Print(c.UI.Output())
+	ctr := counter.New()
+	defer ctr.Print(c.UI.Output())
 
 	var stop bool
 	for {
@@ -51,27 +51,27 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 		name := path.Clean(header.Name)
 		switch name {
 		case "object_types.json":
-			if err := c.loadObjectTypes(ctx, tr, counter.ObjectTypes); err != nil {
+			if err := c.loadObjectTypes(ctx, tr, ctr.ObjectTypes); err != nil {
 				return err
 			}
 
 		case "permissions.json":
-			if err := c.loadPermissions(ctx, tr, counter.Permissions); err != nil {
+			if err := c.loadPermissions(ctx, tr, ctr.Permissions); err != nil {
 				return err
 			}
 
 		case "relation_types.json":
-			if err := c.loadRelationTypes(ctx, tr, counter.RelationTypes); err != nil {
+			if err := c.loadRelationTypes(ctx, tr, ctr.RelationTypes); err != nil {
 				return err
 			}
 
 		case "objects.json":
-			if err := c.loadObjects(ctx, tr, counter.Objects); err != nil {
+			if err := c.loadObjects(ctx, tr, ctr.Objects); err != nil {
 				return err
 			}
 
 		case "relations.json":
-			if err := c.loadRelations(ctx, tr, counter.Relations); err != nil {
+			if err := c.loadRelations(ctx, tr, ctr.Relations); err != nil {
 				return err
 			}
 
@@ -87,7 +87,7 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 	return nil
 }
 
-func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader, counter *counter.Item) error {
+func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	objTypes, _ := js.NewArrayReader(r)
 	defer objTypes.Close()
 
@@ -108,13 +108,13 @@ func (c *Client) loadObjectTypes(ctx context.Context, r io.Reader, counter *coun
 		if err != nil {
 			return err
 		}
-		counter.Incr().Print(c.UI.Output())
+		ctr.Incr().Print(c.UI.Output())
 	}
 
 	return nil
 }
 
-func (c *Client) loadPermissions(ctx context.Context, r io.Reader, counter *counter.Item) error {
+func (c *Client) loadPermissions(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	permissions, _ := js.NewArrayReader(r)
 	defer permissions.Close()
 
@@ -135,13 +135,13 @@ func (c *Client) loadPermissions(ctx context.Context, r io.Reader, counter *coun
 		if err != nil {
 			return err
 		}
-		counter.Incr().Print(c.UI.Output())
+		ctr.Incr().Print(c.UI.Output())
 	}
 
 	return nil
 }
 
-func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader, counter *counter.Item) error {
+func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	relTypes, _ := js.NewArrayReader(r)
 	defer relTypes.Close()
 
@@ -162,13 +162,13 @@ func (c *Client) loadRelationTypes(ctx context.Context, r io.Reader, counter *co
 		if err != nil {
 			return err
 		}
-		counter.Incr().Print(c.UI.Output())
+		ctr.Incr().Print(c.UI.Output())
 	}
 
 	return nil
 }
 
-func (c *Client) loadObjects(ctx context.Context, r io.Reader, counter *counter.Item) error {
+func (c *Client) loadObjects(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	objects, _ := js.NewArrayReader(r)
 	defer objects.Close()
 
@@ -189,13 +189,13 @@ func (c *Client) loadObjects(ctx context.Context, r io.Reader, counter *counter.
 		if err != nil {
 			return err
 		}
-		counter.Incr().Print(c.UI.Output())
+		ctr.Incr().Print(c.UI.Output())
 	}
 
 	return nil
 }
 
-func (c *Client) loadRelations(ctx context.Context, r io.Reader, counter *counter.Item) error {
+func (c *Client) loadRelations(ctx context.Context, r io.Reader, ctr *counter.Item) error {
 	relations, _ := js.NewArrayReader(r)
 	defer relations.Close()
 
@@ -216,7 +216,7 @@ func (c *Client) loadRelations(ctx context.Context, r io.Reader, counter *counte
 		if err != nil {
 			return err
 		}
-		counter.Incr().Print(c.UI.Output())
+		ctr.Incr().Print(c.UI.Output())
 	}
 
 	return nil

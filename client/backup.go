@@ -115,7 +115,7 @@ func (c *Client) createBackupFiles(stream dse.Exporter_ExportClient, dirPath str
 	relations, _ := js.NewArrayWriter(path.Join(dirPath, "relations.json"))
 	defer relations.Close()
 
-	counter := counter.New()
+	ctr := counter.New()
 
 	for {
 		msg, err := stream.Recv()
@@ -129,23 +129,23 @@ func (c *Client) createBackupFiles(stream dse.Exporter_ExportClient, dirPath str
 		switch m := msg.Msg.(type) {
 		case *dse.ExportResponse_ObjectType:
 			err = objTypes.Write(m.ObjectType)
-			counter.ObjectTypes.Incr().Print(c.UI.Output())
+			ctr.ObjectTypes.Incr().Print(c.UI.Output())
 
 		case *dse.ExportResponse_Permission:
 			err = permissions.Write(m.Permission)
-			counter.Permissions.Incr().Print(c.UI.Output())
+			ctr.Permissions.Incr().Print(c.UI.Output())
 
 		case *dse.ExportResponse_RelationType:
 			err = relTypes.Write(m.RelationType)
-			counter.RelationTypes.Incr().Print(c.UI.Output())
+			ctr.RelationTypes.Incr().Print(c.UI.Output())
 
 		case *dse.ExportResponse_Object:
 			err = objects.Write(m.Object)
-			counter.Objects.Incr().Print(c.UI.Output())
+			ctr.Objects.Incr().Print(c.UI.Output())
 
 		case *dse.ExportResponse_Relation:
 			err = relations.Write(m.Relation)
-			counter.Relations.Incr().Print(c.UI.Output())
+			ctr.Relations.Incr().Print(c.UI.Output())
 
 		default:
 			c.UI.Exclamation().Msg("Unknown message type")
@@ -156,7 +156,7 @@ func (c *Client) createBackupFiles(stream dse.Exporter_ExportClient, dirPath str
 		}
 	}
 
-	counter.Print(c.UI.Output())
+	ctr.Print(c.UI.Output())
 
 	return nil
 }
