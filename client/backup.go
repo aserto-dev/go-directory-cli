@@ -4,12 +4,11 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"path"
-	"sync/atomic"
 
+	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
 	dse "github.com/aserto-dev/go-directory/aserto/directory/exporter/v2"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -116,7 +115,7 @@ func (c *Client) createBackupFiles(stream dse.Exporter_ExportClient, dirPath str
 	relations, _ := js.NewArrayWriter(path.Join(dirPath, "relations.json"))
 	defer relations.Close()
 
-	counter := Counter{}
+	counter := counter.New()
 
 	for {
 		msg, err := stream.Recv()
@@ -130,23 +129,23 @@ func (c *Client) createBackupFiles(stream dse.Exporter_ExportClient, dirPath str
 		switch m := msg.Msg.(type) {
 		case *dse.ExportResponse_ObjectType:
 			err = objTypes.Write(m.ObjectType)
-			counter.IncObjectTypes()
+			counter.ObjectTypes.Incr().Print(c.UI.Output())
 
 		case *dse.ExportResponse_Permission:
 			err = permissions.Write(m.Permission)
-			counter.IncPermission()
+			counter.Permissions.Incr().Print(c.UI.Output())
 
 		case *dse.ExportResponse_RelationType:
 			err = relTypes.Write(m.RelationType)
-			counter.IncRelationTypes()
+			counter.RelationTypes.Incr().Print(c.UI.Output())
 
 		case *dse.ExportResponse_Object:
 			err = objects.Write(m.Object)
-			counter.IncObjects()
+			counter.Objects.Incr().Print(c.UI.Output())
 
 		case *dse.ExportResponse_Relation:
 			err = relations.Write(m.Relation)
-			counter.IncRelations()
+			counter.Relations.Incr().Print(c.UI.Output())
 
 		default:
 			c.UI.Exclamation().Msg("Unknown message type")
@@ -157,51 +156,7 @@ func (c *Client) createBackupFiles(stream dse.Exporter_ExportClient, dirPath str
 		}
 	}
 
-	counter.Summary(c.UI.Output())
+	counter.Print(c.UI.Output())
 
 	return nil
-}
-
-type Counter struct {
-	ObjectTypes   int64
-	Permissions   int64
-	RelationTypes int64
-	Objects       int64
-	Relations     int64
-}
-
-func (c *Counter) IncObjectTypes() {
-	atomic.AddInt64(&c.ObjectTypes, 1)
-}
-
-func (c *Counter) IncPermission() {
-	atomic.AddInt64(&c.Permissions, 1)
-}
-
-func (c *Counter) IncRelationTypes() {
-	atomic.AddInt64(&c.RelationTypes, 1)
-}
-
-func (c *Counter) IncObjects() {
-	atomic.AddInt64(&c.Objects, 1)
-}
-
-func (c *Counter) IncRelations() {
-	atomic.AddInt64(&c.Relations, 1)
-}
-
-func (c *Counter) Reset() {
-	c.ObjectTypes = 0
-	c.Permissions = 0
-	c.RelationTypes = 0
-	c.Objects = 0
-	c.Relations = 0
-}
-
-func (c *Counter) Summary(w io.Writer) {
-	fmt.Fprintf(w, "%15s %d\n", "object types:", c.ObjectTypes)
-	fmt.Fprintf(w, "%15s %d\n", "permissions:", c.Permissions)
-	fmt.Fprintf(w, "%15s %d\n", "relation types:", c.RelationTypes)
-	fmt.Fprintf(w, "%15s %d\n", "objects:", c.Objects)
-	fmt.Fprintf(w, "%15s %d\n", "relations:", c.Relations)
 }
