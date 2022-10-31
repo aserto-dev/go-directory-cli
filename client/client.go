@@ -1,8 +1,8 @@
 package client
 
 import (
-	asertogoClient "github.com/aserto-dev/aserto-go/client"
 	"github.com/aserto-dev/clui"
+	asertoClient "github.com/aserto-dev/go-aserto/client"
 	dse "github.com/aserto-dev/go-directory/aserto/directory/exporter/v2"
 	dsi "github.com/aserto-dev/go-directory/aserto/directory/importer/v2"
 	dsr "github.com/aserto-dev/go-directory/aserto/directory/reader/v2"
@@ -10,7 +10,7 @@ import (
 )
 
 type Client struct {
-	conn     *asertogoClient.Connection
+	conn     *asertoClient.Connection
 	Writer   dsw.WriterClient
 	Exporter dse.ExporterClient
 	Importer dsi.ImporterClient
@@ -18,7 +18,7 @@ type Client struct {
 	UI       *clui.UI
 }
 
-func New(conn *asertogoClient.Connection, ui *clui.UI) (*Client, error) {
+func New(conn *asertoClient.Connection, ui *clui.UI) (*Client, error) {
 	c := Client{
 		conn:     conn,
 		Writer:   dsw.NewWriterClient(conn.Conn),
