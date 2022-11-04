@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"os"
-	"sort"
 
 	v2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
 	"github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
@@ -35,7 +34,7 @@ func (c *Client) Load(ctx context.Context, file string) error {
 		return err
 	}
 
-	manifestEntriesWithUnions := make(ObjectRelation, 0)
+	manifestEntriesWithUnions := make(map[string]map[string][]string, 0)
 	permissions := make(map[string]bool, 0)
 
 	c.UI.Normal().Msg("Loading from manifest")
@@ -48,7 +47,6 @@ func (c *Client) Load(ctx context.Context, file string) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed to set object type %s", objectType)
 		}
-		relationsLoaded := []string{}
 		for relationType, data := range manifestEntry {
 			// at first we create relation types that don't have unions
 			if len(data["union"]) > 0 {
@@ -69,47 +67,30 @@ func (c *Client) Load(ctx context.Context, file string) error {
 				if err != nil {
 					return errors.Wrapf(err, "failed to set relation type %s", relationType)
 				}
-				relationsLoaded = append(relationsLoaded, relationType)
 			}
 		}
-		for len(manifestEntriesWithUnions) > 0 {
-			manifestEntriesWithUnions, err = c.loadRels(ctx, manifestEntriesWithUnions, permissions, relationsLoaded, objectType)
+
+		for relationType, data := range manifestEntriesWithUnions {
+			err := c.setPermissions(data["permissions"], permissions)
 			if err != nil {
-				return err
+				return errors.Wrapf(err, "failed to set permissions for relation %s", relationType)
+			}
+
+			req := &writer.SetRelationTypeRequest{
+				RelationType: &v2.RelationType{
+					Name:        relationType,
+					Permissions: data["permissions"],
+					ObjectType:  objectType,
+					Unions:      data["union"],
+				}}
+			_, err = c.Writer.SetRelationType(ctx, req)
+			if err != nil {
+				return errors.Wrapf(err, "failed to set relation type %s", relationType)
 			}
 		}
 	}
 
 	return nil
-}
-
-func (c *Client) loadRels(ctx context.Context, manifestEntriesWithUnions ObjectRelation, permissions map[string]bool, relationsLoaded []string, objectType string) (ObjectRelation, error) {
-	for relationType, data := range manifestEntriesWithUnions {
-		err := c.setPermissions(data["permissions"], permissions)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to set permissions for relation %s", relationType)
-		}
-
-		if !allUnionRelWereLoaded(data["union"], relationsLoaded) {
-			continue
-		}
-
-		req := &writer.SetRelationTypeRequest{
-			RelationType: &v2.RelationType{
-				Name:        relationType,
-				Permissions: data["permissions"],
-				ObjectType:  objectType,
-				Unions:      data["union"],
-			}}
-		_, err = c.Writer.SetRelationType(ctx, req)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to set relation type %s", relationType)
-		}
-		relationsLoaded = append(relationsLoaded, relationType)
-		delete(manifestEntriesWithUnions, relationType)
-	}
-
-	return manifestEntriesWithUnions, nil
 }
 
 func (c *Client) setPermissions(permissions []string, alreadyAddedPerms map[string]bool) error {
@@ -124,27 +105,4 @@ func (c *Client) setPermissions(permissions []string, alreadyAddedPerms map[stri
 		}
 	}
 	return nil
-}
-
-func allUnionRelWereLoaded(unions, relationsLoaded []string) bool {
-	if len(unions) > len(relationsLoaded) {
-		return false
-	}
-	sort.Strings(unions)
-	sort.Strings(relationsLoaded)
-
-	for _, unionRel := range unions {
-		var found bool
-		for _, rel := range relationsLoaded {
-			if unionRel == rel {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			return false
-		}
-	}
-	return true
 }
