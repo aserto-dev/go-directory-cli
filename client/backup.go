@@ -100,19 +100,34 @@ func addToArchive(tw *tar.Writer, filename string) error {
 }
 
 func (c *Client) createBackupFiles(stream dse.Exporter_ExportClient, dirPath string) error {
-	objTypes, _ := js.NewArrayWriter(path.Join(dirPath, "object_types.json"))
+	objTypes, err := js.NewWriter(path.Join(dirPath, ObjectTypesFileName), ObjectTypesStr)
+	if err != nil {
+		return err
+	}
 	defer objTypes.Close()
 
-	permissions, _ := js.NewArrayWriter(path.Join(dirPath, "permissions.json"))
+	permissions, err := js.NewWriter(path.Join(dirPath, PermissionsFileName), PermissionsStr)
+	if err != nil {
+		return err
+	}
 	defer permissions.Close()
 
-	relTypes, _ := js.NewArrayWriter(path.Join(dirPath, "relation_types.json"))
+	relTypes, err := js.NewWriter(path.Join(dirPath, RelationTypesFileName), RelationTypesStr)
+	if err != nil {
+		return err
+	}
 	defer relTypes.Close()
 
-	objects, _ := js.NewArrayWriter(path.Join(dirPath, "objects.json"))
+	objects, err := js.NewWriter(path.Join(dirPath, ObjectsFileName), ObjectsStr)
+	if err != nil {
+		return err
+	}
 	defer objects.Close()
 
-	relations, _ := js.NewArrayWriter(path.Join(dirPath, "relations.json"))
+	relations, err := js.NewWriter(path.Join(dirPath, RelationsFileName), RelationsStr)
+	if err != nil {
+		return err
+	}
 	defer relations.Close()
 
 	ctr := counter.New()

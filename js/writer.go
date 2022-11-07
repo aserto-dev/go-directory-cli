@@ -1,46 +1,58 @@
 package js
 
 import (
-	"encoding/json"
-	"io"
+	"fmt"
+	"os"
 
 	"github.com/aserto-dev/go-directory/pkg/pb"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 )
 
-type ArrayReader struct {
-	dec   *json.Decoder
+type Writer struct {
+	w     *os.File
 	first bool
 }
 
-func NewArrayReader(r io.Reader) (*ArrayReader, error) {
-
-	dec := json.NewDecoder(r)
-
-	// advance reader to array start token
-	tok, _ := dec.Token()
-	if delim, ok := tok.(json.Delim); !ok && delim.String() != "[" {
-		return nil, errors.Errorf("file does not contain a JSON array")
+func NewWriter(path, key string) (*Writer, error) {
+	w, err := os.Create(path)
+	if err != nil {
+		return nil, err
 	}
 
-	return &ArrayReader{
-		dec:   dec,
+	f := Writer{
+		w:     w,
 		first: false,
-	}, nil
-}
-
-func (r *ArrayReader) Close() error {
-	return nil
-}
-
-func (r *ArrayReader) Read(m proto.Message) error {
-	if !r.dec.More() {
-		return io.EOF
 	}
 
-	if err := pb.UnmarshalNext(r.dec, m); err != nil {
+	_, _ = f.w.WriteString("{\n")
+	_, _ = f.w.WriteString(fmt.Sprintf("%q:\n", key))
+	_, _ = f.w.WriteString("[\n")
+
+	return &f, nil
+}
+
+func (f *Writer) Close() error {
+	if f.w != nil {
+		_, _ = f.w.WriteString("]\n")
+		_, _ = f.w.WriteString("}\n")
+		f.first = false
+		err := f.w.Close()
+		f.w = nil
 		return err
 	}
 	return nil
+}
+
+func (f *Writer) Write(msg proto.Message) error {
+	if f.first {
+		_, _ = f.w.WriteString(",")
+	}
+
+	err := pb.ProtoToBuf(f.w, msg)
+
+	if !f.first {
+		f.first = true
+	}
+
+	return err
 }
