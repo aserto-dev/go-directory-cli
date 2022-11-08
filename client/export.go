@@ -20,11 +20,17 @@ func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) 
 	}
 
 	c.UI.Normal().Msgf("Exporting objects to %s", objectsFile)
-	objects, _ := js.NewArrayWriter(objectsFile)
+	objects, err := js.NewWriter(objectsFile, ObjectsStr)
+	if err != nil {
+		return err
+	}
 	defer objects.Close()
 
 	c.UI.Normal().Msgf("Exporting relations to %s", relationsFile)
-	relations, _ := js.NewArrayWriter(relationsFile)
+	relations, err := js.NewWriter(relationsFile, RelationsStr)
+	if err != nil {
+		return err
+	}
 	defer relations.Close()
 
 	ctr := counter.New()

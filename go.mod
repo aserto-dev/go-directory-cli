@@ -7,6 +7,7 @@ require (
 	github.com/aserto-dev/go-aserto v0.0.3
 	github.com/aserto-dev/go-directory v0.20.1
 	github.com/magefile/mage v1.14.0
+	github.com/mattn/go-isatty v0.0.16
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0

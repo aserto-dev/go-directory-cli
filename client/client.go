@@ -9,6 +9,19 @@ import (
 	dsw "github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
 )
 
+const (
+	ObjectsStr            = "objects"
+	ObjectsFileName       = "objects.json"
+	RelationsStr          = "relations"
+	RelationsFileName     = "relations.json"
+	ObjectTypesStr        = "object_types"
+	ObjectTypesFileName   = "object_types.json"
+	PermissionsStr        = "permissions"
+	PermissionsFileName   = "permissions.json"
+	RelationTypesStr      = "relation_types"
+	RelationTypesFileName = "relation_types.json"
+)
+
 type Client struct {
 	conn     *asertoClient.Connection
 	Writer   dsw.WriterClient
