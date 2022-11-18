@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	// Set private repositories
+	os.Setenv("GO_VERSION", "1.19")
 	os.Setenv("GOPRIVATE", "github.com/aserto-dev")
 }
 
