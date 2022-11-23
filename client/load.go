@@ -6,6 +6,7 @@ import (
 
 	v2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
 	"github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
+	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -18,7 +19,7 @@ type Manifest map[string]ObjectRelation
 
 func (c *Client) Load(ctx context.Context, file string) error {
 
-	c.UI.Normal().Msgf("Reading manifest [%s]", file)
+	color.Green(">>> reading manifest [%s]", file)
 
 	yfile, err := os.ReadFile(file)
 
@@ -37,7 +38,6 @@ func (c *Client) Load(ctx context.Context, file string) error {
 	manifestEntriesWithUnions := make(map[string]map[string][]string, 0)
 	permissions := make(map[string]bool, 0)
 
-	c.UI.Normal().Msg("Loading from manifest")
 	for objectType, manifestEntry := range manifestData {
 		req := &writer.SetObjectTypeRequest{
 			ObjectType: &v2.ObjectType{
