@@ -6,6 +6,7 @@ import (
 
 	v2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
 	"github.com/aserto-dev/go-directory/aserto/directory/reader/v2"
+	"github.com/fatih/color"
 	"gopkg.in/yaml.v2"
 )
 
@@ -14,7 +15,7 @@ func (c *Client) Save(ctx context.Context, file string) error {
 	manifestData := make(Manifest, 0)
 
 	// read object types
-	c.UI.Normal().Msg("Retrieving object types")
+	color.Green(">>> retrieving object types")
 	pageToken := ""
 	for {
 		req := &reader.GetObjectTypesRequest{
@@ -37,7 +38,7 @@ func (c *Client) Save(ctx context.Context, file string) error {
 		}
 	}
 
-	c.UI.Normal().Msgf("Writing manifest to file [%s]", file)
+	color.Green(">>> writing manifest to file [%s]", file)
 	yamlData, err := yaml.Marshal(&manifestData)
 	if err != nil {
 		return err
@@ -55,7 +56,7 @@ func (c *Client) getRelationTypes(ctx context.Context, data Manifest, object *v2
 	token := ""
 	objRel := make(ObjectRelation, 0)
 
-	c.UI.Normal().Msgf("Retrieving relation types for object type [%s]", object.Name)
+	color.Green("retrieving relation types for object type [%s]", object.Name)
 	for {
 		relReq := &reader.GetRelationTypesRequest{
 			Param: &v2.ObjectTypeIdentifier{Id: &object.Id},
