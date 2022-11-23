@@ -15,7 +15,6 @@ import (
 )
 
 func (c *Client) Restore(ctx context.Context, file string) error {
-
 	tf, err := os.Open(file)
 	if err != nil {
 		return err
@@ -32,7 +31,10 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 
 	ctr := counter.New()
 	defer ctr.Print(c.UI.Output())
+	return c.loadBackupFile(ctx, tr, *ctr)
+}
 
+func (c *Client) loadBackupFile(ctx context.Context, tr *tar.Reader, ctr counter.Counter) error {
 	var stop bool
 	for {
 		header, err := tr.Next()

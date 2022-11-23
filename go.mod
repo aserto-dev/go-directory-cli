@@ -1,6 +1,6 @@
 module github.com/aserto-dev/go-directory-cli
 
-go 1.17
+go 1.19
 
 require (
 	github.com/aserto-dev/clui v0.8.1
