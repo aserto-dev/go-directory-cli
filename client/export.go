@@ -64,7 +64,7 @@ func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) 
 	}
 
 	ctr.Print(c.UI.Output())
-	color.Green(">>> finished import")
+	color.Green(">>> finished export")
 
 	return nil
 }
