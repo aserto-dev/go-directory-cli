@@ -52,16 +52,16 @@ func (c *Client) importFile(ctx context.Context, ctr *counter.Counter, file stri
 
 	switch objectType {
 	case ObjectsStr:
-		if err := c.loadObjects(ctx, reader, ctr.Objects); err != nil {
+		if err := c.loadObjects(ctx, reader, ctr.Objects()); err != nil {
 			return err
 		}
 
 	case RelationsStr:
-		if err := c.loadRelations(ctx, reader, ctr.Relations); err != nil {
+		if err := c.loadRelations(ctx, reader, ctr.Relations()); err != nil {
 			return err
 		}
 	default:
-		return errors.Errorf("invalid object type: [%s]", objectType)
+		c.UI.Problem().Msgf("skipping file [%s] with object type [%s]", file, objectType)
 	}
 	return nil
 }
