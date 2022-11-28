@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/aserto-dev/go-directory-cli/counter"
@@ -17,7 +16,7 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 
 	// read all files
 	for _, file := range files {
-		color.Green(">>> importing from %s", file)
+		color.Green("\033[2K\r>>> importing from %s\n", file)
 		err := c.importFile(ctx, ctr, file)
 		if err != nil {
 			return err
@@ -25,6 +24,7 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 	}
 
 	ctr.Print(c.UI.Output())
+	color.Green(">>> finished import")
 
 	return nil
 }
@@ -52,17 +52,16 @@ func (c *Client) importFile(ctx context.Context, ctr *counter.Counter, file stri
 
 	switch objectType {
 	case ObjectsStr:
-		if err := c.loadObjects(ctx, reader, ctr.Objects); err != nil {
+		if err := c.loadObjects(ctx, reader, ctr.Objects()); err != nil {
 			return err
 		}
 
 	case RelationsStr:
-		if err := c.loadRelations(ctx, reader, ctr.Relations); err != nil {
+		if err := c.loadRelations(ctx, reader, ctr.Relations()); err != nil {
 			return err
 		}
 	default:
-		return errors.Errorf("invalid object type: [%s]", objectType)
+		c.UI.Problem().Msgf("skipping file [%s] with object type [%s]", file, objectType)
 	}
-	fmt.Fprintln(c.UI.Output())
 	return nil
 }
