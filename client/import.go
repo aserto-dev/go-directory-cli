@@ -49,14 +49,19 @@ func (c *Client) importFile(ctx context.Context, ctr *counter.Counter, file stri
 		return nil
 	}
 
+	stream, err := c.Importer.Import(ctx)
+	if err != nil {
+		return err
+	}
+
 	switch objectType {
 	case ObjectsStr:
-		if err := c.loadObjects(ctx, reader, ctr.Objects); err != nil {
+		if err := c.loadObjects(stream, reader, ctr.Objects); err != nil {
 			return err
 		}
 
 	case RelationsStr:
-		if err := c.loadRelations(ctx, reader, ctr.Relations); err != nil {
+		if err := c.loadRelations(stream, reader, ctr.Relations); err != nil {
 			return err
 		}
 	default:
