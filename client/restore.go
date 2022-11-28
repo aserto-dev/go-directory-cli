@@ -100,6 +100,10 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 		}
 	}
 
+	if err := stream.CloseSend(); err != nil {
+		return err
+	}
+
 	return nil
 }
 

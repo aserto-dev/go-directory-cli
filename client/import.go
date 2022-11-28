@@ -68,5 +68,10 @@ func (c *Client) importFile(ctx context.Context, ctr *counter.Counter, file stri
 	default:
 		c.UI.Problem().Msgf("skipping file [%s] with object type [%s]", file, objectType)
 	}
+
+	if err := stream.CloseSend(); err != nil {
+		return err
+	}
+
 	return nil
 }
