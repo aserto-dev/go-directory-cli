@@ -7,6 +7,7 @@ import (
 
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
+	"github.com/fatih/color"
 	"github.com/pkg/errors"
 )
 
@@ -16,7 +17,7 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 
 	// read all files
 	for _, file := range files {
-		c.UI.Normal().Msgf("Reading file %s", file)
+		color.Green(">>> importing from %s", file)
 		err := c.importFile(ctx, ctr, file)
 		if err != nil {
 			return err
