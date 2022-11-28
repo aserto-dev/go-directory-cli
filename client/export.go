@@ -35,6 +35,8 @@ func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) 
 	defer relations.Close()
 
 	ctr := counter.New()
+	objectsCounter := ctr.Objects()
+	relationsCounter := ctr.Relations()
 
 	for {
 		msg, err := stream.Recv()
@@ -48,11 +50,11 @@ func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) 
 		switch m := msg.Msg.(type) {
 		case *dse.ExportResponse_Object:
 			err = objects.Write(m.Object)
-			ctr.Objects.Incr().Print(c.UI.Output())
+			objectsCounter.Incr().Print(c.UI.Output())
 
 		case *dse.ExportResponse_Relation:
 			err = relations.Write(m.Relation)
-			ctr.Relations.Incr().Print(c.UI.Output())
+			relationsCounter.Incr().Print(c.UI.Output())
 
 		default:
 			c.UI.Problem().Msg("unknown message type")
@@ -64,7 +66,7 @@ func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) 
 	}
 
 	ctr.Print(c.UI.Output())
-	color.Green(">>> finished import")
+	color.Green(">>> finished export")
 
 	return nil
 }

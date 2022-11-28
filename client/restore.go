@@ -32,6 +32,11 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 	tr := tar.NewReader(gz)
 
 	ctr := counter.New()
+	objectTypesCounter := ctr.ObjectTypes()
+	permissionsCounter := ctr.Permissions()
+	relationTypesCounter := ctr.RelationTypes()
+	objectsCounter := ctr.Objects()
+	relationsCounter := ctr.Relations()
 	defer ctr.Print(c.UI.Output())
 
 	stream, err := c.Importer.Import(ctx)
@@ -62,27 +67,27 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 		name := path.Clean(header.Name)
 		switch name {
 		case ObjectTypesFileName:
-			if err := c.loadObjectTypes(stream, r, ctr.ObjectTypes); err != nil {
+			if err := c.loadObjectTypes(stream, r, objectTypesCounter); err != nil {
 				return err
 			}
 
 		case PermissionsFileName:
-			if err := c.loadPermissions(stream, r, ctr.Permissions); err != nil {
+			if err := c.loadPermissions(stream, r, permissionsCounter); err != nil {
 				return err
 			}
 
 		case RelationTypesFileName:
-			if err := c.loadRelationTypes(stream, r, ctr.RelationTypes); err != nil {
+			if err := c.loadRelationTypes(stream, r, relationTypesCounter); err != nil {
 				return err
 			}
 
 		case ObjectsFileName:
-			if err := c.loadObjects(stream, r, ctr.Objects); err != nil {
+			if err := c.loadObjects(stream, r, objectsCounter); err != nil {
 				return err
 			}
 
 		case RelationsFileName:
-			if err := c.loadRelations(stream, r, ctr.Relations); err != nil {
+			if err := c.loadRelations(stream, r, relationsCounter); err != nil {
 				return err
 			}
 
