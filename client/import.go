@@ -31,33 +31,8 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 func (c *Client) importHandler(stream dsi.Importer_ImportClient, files []string, ctr *counter.Counter) func() error {
 	return func() error {
 		for _, file := range files {
-			r, err := os.Open(file)
-			if err != nil {
-				return errors.Wrapf(err, "failed to open file: [%s]", file)
-			}
-			defer r.Close()
-
-			reader, err := js.NewReader(r, c.UI)
-			if err != nil || reader == nil {
-				c.UI.Problem().Msgf("Skipping file [%s]: [%s]", file, err.Error())
-				continue
-			}
-			defer reader.Close()
-
-			objectType := reader.GetObjectType()
-			switch objectType {
-			case ObjectsStr:
-				if err := c.loadObjects(stream, reader, ctr.Objects()); err != nil {
-					return err
-				}
-
-			case RelationsStr:
-				if err := c.loadRelations(stream, reader, ctr.Relations()); err != nil {
-					return err
-				}
-
-			default:
-				c.UI.Problem().Msgf("skipping file [%s] with object type [%s]", file, objectType)
+			if err := c.importFile(stream, file, ctr); err != nil {
+				return err
 			}
 		}
 
@@ -67,4 +42,37 @@ func (c *Client) importHandler(stream dsi.Importer_ImportClient, files []string,
 
 		return nil
 	}
+}
+
+func (c *Client) importFile(stream dsi.Importer_ImportClient, file string, ctr *counter.Counter) error {
+	r, err := os.Open(file)
+	if err != nil {
+		return errors.Wrapf(err, "failed to open file: [%s]", file)
+	}
+	defer r.Close()
+
+	reader, err := js.NewReader(r, c.UI)
+	if err != nil || reader == nil {
+		c.UI.Problem().Msgf("Skipping file [%s]: [%s]", file, err.Error())
+		return nil
+	}
+	defer reader.Close()
+
+	objectType := reader.GetObjectType()
+	switch objectType {
+	case ObjectsStr:
+		if err := c.loadObjects(stream, reader, ctr.Objects()); err != nil {
+			return err
+		}
+
+	case RelationsStr:
+		if err := c.loadRelations(stream, reader, ctr.Relations()); err != nil {
+			return err
+		}
+
+	default:
+		c.UI.Problem().Msgf("skipping file [%s] with object type [%s]", file, objectType)
+	}
+
+	return nil
 }
