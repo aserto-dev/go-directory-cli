@@ -2,11 +2,11 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	v2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
 	"github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
-	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -19,7 +19,7 @@ type Manifest map[string]ObjectRelation
 
 func (c *Client) Load(ctx context.Context, file string) error {
 
-	color.Green(">>> reading manifest [%s]", file)
+	fmt.Fprintf(c.UI.Output(), ">>> reading manifest [%s]", file)
 
 	yfile, err := os.ReadFile(file)
 

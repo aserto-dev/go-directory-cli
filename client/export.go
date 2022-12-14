@@ -7,7 +7,6 @@ import (
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
 	dse "github.com/aserto-dev/go-directory/aserto/directory/exporter/v2"
-	"github.com/fatih/color"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -20,14 +19,12 @@ func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) 
 		return err
 	}
 
-	color.Green(">>> exporting objects to %s", objectsFile)
 	objects, err := js.NewWriter(objectsFile, ObjectsStr)
 	if err != nil {
 		return err
 	}
 	defer objects.Close()
 
-	color.Green(">>> exporting relations to %s", relationsFile)
 	relations, err := js.NewWriter(relationsFile, RelationsStr)
 	if err != nil {
 		return err
@@ -66,7 +63,6 @@ func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) 
 	}
 
 	ctr.Print(c.UI.Output())
-	color.Green(">>> finished export")
 
 	return nil
 }

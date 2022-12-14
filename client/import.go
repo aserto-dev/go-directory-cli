@@ -6,72 +6,65 @@ import (
 
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
-	"github.com/fatih/color"
+	dsi "github.com/aserto-dev/go-directory/aserto/directory/importer/v2"
 	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 func (c *Client) Import(ctx context.Context, files []string) error {
-
 	ctr := counter.New()
+	defer ctr.Print(c.UI.Output())
 
-	// read all files
-	for _, file := range files {
-		color.Green("\033[2K\r>>> importing from %s\n", file)
-		err := c.importFile(ctx, ctr, file)
-		if err != nil {
-			return err
-		}
+	g, iCtx := errgroup.WithContext(context.Background())
+	stream, err := c.Importer.Import(iCtx)
+	if err != nil {
+		return err
 	}
 
-	ctr.Print(c.UI.Output())
-	color.Green(">>> finished import")
+	g.Go(c.receiver(stream))
 
-	return nil
+	g.Go(c.importHandler(stream, files, ctr))
+
+	return g.Wait()
 }
 
-func (c *Client) importFile(ctx context.Context, ctr *counter.Counter, file string) error {
-	r, err := os.Open(file)
-	if err != nil {
-		return errors.Wrapf(err, "failed to open file: [%s]", file)
-	}
-	defer r.Close()
+func (c *Client) importHandler(stream dsi.Importer_ImportClient, files []string, ctr *counter.Counter) func() error {
+	return func() error {
+		for _, file := range files {
+			r, err := os.Open(file)
+			if err != nil {
+				return errors.Wrapf(err, "failed to open file: [%s]", file)
+			}
+			defer r.Close()
 
-	var objectType string
-	reader, err := js.NewReader(r, c.UI)
-	if err != nil {
-		c.UI.Problem().Msgf("Skipping file [%s]: [%s]", file, err.Error())
-		return nil
-	}
+			reader, err := js.NewReader(r, c.UI)
+			if err != nil || reader == nil {
+				c.UI.Problem().Msgf("Skipping file [%s]: [%s]", file, err.Error())
+				continue
+			}
+			defer reader.Close()
 
-	if reader != nil {
-		objectType = reader.GetObjectType()
-	} else {
-		c.UI.Problem().Msgf("Skipping file [%s]: invalid json format", file)
-		return nil
-	}
+			objectType := reader.GetObjectType()
+			switch objectType {
+			case ObjectsStr:
+				if err := c.loadObjects(stream, reader, ctr.Objects()); err != nil {
+					return err
+				}
 
-	stream, err := c.Importer.Import(ctx)
-	if err != nil {
-		return err
-	}
+			case RelationsStr:
+				if err := c.loadRelations(stream, reader, ctr.Relations()); err != nil {
+					return err
+				}
 
-	switch objectType {
-	case ObjectsStr:
-		if err := c.loadObjects(stream, reader, ctr.Objects()); err != nil {
+			default:
+				c.UI.Problem().Msgf("skipping file [%s] with object type [%s]", file, objectType)
+			}
+		}
+
+		if err := stream.CloseSend(); err != nil {
 			return err
 		}
 
-	case RelationsStr:
-		if err := c.loadRelations(stream, reader, ctr.Relations()); err != nil {
-			return err
-		}
-	default:
-		c.UI.Problem().Msgf("skipping file [%s] with object type [%s]", file, objectType)
+		return nil
 	}
-
-	if err := stream.CloseSend(); err != nil {
-		return err
-	}
-
-	return nil
 }

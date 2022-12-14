@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"errors"
 	"io"
 	"os"
 	"path"
@@ -12,11 +13,10 @@ import (
 	"github.com/aserto-dev/go-directory-cli/js"
 	dsc "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
 	dsi "github.com/aserto-dev/go-directory/aserto/directory/importer/v2"
+	"golang.org/x/sync/errgroup"
 )
 
-// nolint: gocyclo // to be refactored
 func (c *Client) Restore(ctx context.Context, file string) error {
-
 	tf, err := os.Open(file)
 	if err != nil {
 		return err
@@ -32,79 +32,101 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 	tr := tar.NewReader(gz)
 
 	ctr := counter.New()
+	defer ctr.Print(c.UI.Output())
+
+	g, iCtx := errgroup.WithContext(context.Background())
+	stream, err := c.Importer.Import(iCtx)
+	if err != nil {
+		return err
+	}
+
+	g.Go(c.receiver(stream))
+
+	g.Go(c.restoreHandler(stream, tr, ctr))
+
+	return g.Wait()
+}
+
+func (c *Client) receiver(stream dsi.Importer_ImportClient) func() error {
+	return func() error {
+		for {
+			_, err := stream.Recv()
+			if err == io.EOF {
+				return nil
+			}
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func (c *Client) restoreHandler(stream dsi.Importer_ImportClient, tr *tar.Reader, ctr *counter.Counter) func() error {
 	objectTypesCounter := ctr.ObjectTypes()
 	permissionsCounter := ctr.Permissions()
 	relationTypesCounter := ctr.RelationTypes()
 	objectsCounter := ctr.Objects()
 	relationsCounter := ctr.Relations()
-	defer ctr.Print(c.UI.Output())
 
-	stream, err := c.Importer.Import(ctx)
-	if err != nil {
-		return err
-	}
+	return func() error {
+		for {
+			header, err := tr.Next()
+			if errors.Is(err, io.EOF) {
+				break
+			}
 
-	var stop bool
-	for {
-		header, err := tr.Next()
+			if err != nil {
+				return err
+			}
 
-		switch {
-		case err == io.EOF:
-			return nil
-		case err != nil:
+			if header == nil || header.Typeflag != tar.TypeReg {
+				continue
+			}
+
+			r, err := js.NewReader(tr, c.UI)
+			if err != nil {
+				return err
+			}
+
+			name := path.Clean(header.Name)
+			switch name {
+			case ObjectTypesFileName:
+				if err := c.loadObjectTypes(stream, r, objectTypesCounter); err != nil {
+					return err
+				}
+
+			case PermissionsFileName:
+				if err := c.loadPermissions(stream, r, permissionsCounter); err != nil {
+					return err
+				}
+
+			case RelationTypesFileName:
+				if err := c.loadRelationTypes(stream, r, relationTypesCounter); err != nil {
+					return err
+				}
+
+			case ObjectsFileName:
+				if err := c.loadObjects(stream, r, objectsCounter); err != nil {
+					return err
+				}
+
+			case RelationsFileName:
+				if err := c.loadRelations(stream, r, relationsCounter); err != nil {
+					return err
+				}
+
+			default:
+				break
+			}
+		}
+
+		if err := stream.CloseSend(); err != nil {
 			return err
 		}
 
-		if header == nil || header.Typeflag != tar.TypeReg {
-			continue
-		}
-
-		r, err := js.NewReader(tr, c.UI)
-		if err != nil {
-			return err
-		}
-
-		name := path.Clean(header.Name)
-		switch name {
-		case ObjectTypesFileName:
-			if err := c.loadObjectTypes(stream, r, objectTypesCounter); err != nil {
-				return err
-			}
-
-		case PermissionsFileName:
-			if err := c.loadPermissions(stream, r, permissionsCounter); err != nil {
-				return err
-			}
-
-		case RelationTypesFileName:
-			if err := c.loadRelationTypes(stream, r, relationTypesCounter); err != nil {
-				return err
-			}
-
-		case ObjectsFileName:
-			if err := c.loadObjects(stream, r, objectsCounter); err != nil {
-				return err
-			}
-
-		case RelationsFileName:
-			if err := c.loadRelations(stream, r, relationsCounter); err != nil {
-				return err
-			}
-
-		default:
-			stop = true
-		}
-
-		if stop {
-			break
-		}
+		return nil
 	}
-
-	if err := stream.CloseSend(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (c *Client) loadObjectTypes(stream dsi.Importer_ImportClient, objTypes *js.Reader, ctr *counter.Item) error {
