@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	v2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
@@ -18,9 +17,6 @@ type ObjectRelation map[string]Relation
 type Manifest map[string]ObjectRelation
 
 func (c *Client) Load(ctx context.Context, file string) error {
-
-	fmt.Fprintf(c.UI.Output(), ">>> reading manifest [%s]", file)
-
 	yfile, err := os.ReadFile(file)
 
 	if err != nil {

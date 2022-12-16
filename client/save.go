@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	v2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
@@ -37,7 +36,6 @@ func (c *Client) Save(ctx context.Context, file string) error {
 		}
 	}
 
-	fmt.Fprintf(c.UI.Output(), ">>> writing manifest to file [%s]", file)
 	yamlData, err := yaml.Marshal(&manifestData)
 	if err != nil {
 		return err
