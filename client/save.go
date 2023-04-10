@@ -55,7 +55,7 @@ func (c *Client) getRelationTypes(ctx context.Context, data Manifest, object *v2
 
 	for {
 		relReq := &reader.GetRelationTypesRequest{
-			Param: &v2.ObjectTypeIdentifier{Id: &object.Id},
+			Param: &v2.ObjectTypeIdentifier{Name: &object.Name},
 			Page:  &v2.PaginationRequest{Token: token},
 		}
 		resp, err := c.Reader.GetRelationTypes(ctx, relReq)
