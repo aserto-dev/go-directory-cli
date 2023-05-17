@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	v2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
 	"github.com/aserto-dev/go-directory/aserto/directory/reader/v2"
@@ -60,7 +61,7 @@ func (c *Client) Load(ctx context.Context, file string) error {
 // create object types.
 func (c *Client) createObjectTypes(ctx context.Context, manifest Manifest) error {
 	for objectType := range manifest {
-		fmt.Printf("set-object %s\n", objectType)
+		fmt.Fprintf(c.UI.Output(), "o:%s\n", objectType)
 		if err := c.getSetObjectType(ctx, objectType); err != nil {
 			return errors.Wrapf(err, "failed to set object type %s", objectType)
 		}
@@ -75,7 +76,7 @@ func (c *Client) createPermissions(ctx context.Context, manifest Manifest) error
 		for _, v := range objectRelation {
 			for _, permission := range v[perms] {
 				if _, ok := permissions[permission]; !ok {
-					fmt.Printf("set-permission %s\n", permission)
+					fmt.Fprintf(c.UI.Output(), "p:%s\n", permission)
 					if err := c.getSetPermission(ctx, permission); err != nil {
 						return errors.Wrapf(err, "failed to set permission %s", permission)
 					}
@@ -91,7 +92,7 @@ func (c *Client) createPermissions(ctx context.Context, manifest Manifest) error
 func (c *Client) createRelationTypes(ctx context.Context, manifest Manifest) error {
 	for objectType, objectRelation := range manifest {
 		for relationType := range objectRelation {
-			fmt.Printf("set-relation %s#%s\n", objectType, relationType)
+			fmt.Fprintf(c.UI.Output(), "r:%s#%s\n", objectType, relationType)
 			if err := c.getSetRelationType(ctx, objectType, relationType, []string{}, []string{}); err != nil {
 				return errors.Wrapf(err, "failed to set relation type %s#%s", objectType, relationType)
 			}
@@ -108,7 +109,7 @@ func (c *Client) updateRelationTypes(ctx context.Context, manifest Manifest) err
 				continue
 			}
 
-			fmt.Printf("update-relation %s#%s\n", objectType, relationType)
+			fmt.Fprintf(c.UI.Output(), "r:%s#%s u:[%s]\n", objectType, relationType, strings.Join(v[union], ","))
 			if err := c.getSetRelationType(ctx, objectType, relationType, v[union], []string{}); err != nil {
 				return errors.Wrapf(err, "failed to set relation type %s#%s", objectType, relationType)
 			}
@@ -121,7 +122,7 @@ func (c *Client) updateRelationTypes(ctx context.Context, manifest Manifest) err
 				continue
 			}
 
-			fmt.Printf("update-relation %s#%s\n", objectType, relationType)
+			fmt.Fprintf(c.UI.Output(), "r:%s#%s p:[%s]\n", objectType, relationType, strings.Join(v[perms], ","))
 			if err := c.getSetRelationType(ctx, objectType, relationType, v[union], v[perms]); err != nil {
 				return errors.Wrapf(err, "failed to set relation type %s#%s", objectType, relationType)
 			}
