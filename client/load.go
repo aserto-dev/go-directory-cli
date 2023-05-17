@@ -100,7 +100,7 @@ func (c *Client) createRelationTypes(ctx context.Context, manifest Manifest) err
 	return nil
 }
 
-// update relation types with unions and permission
+// update relation types with unions and permission.
 func (c *Client) updateRelationTypes(ctx context.Context, manifest Manifest) error {
 	for objectType, objectRelation := range manifest {
 		for relationType, v := range objectRelation {
