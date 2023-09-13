@@ -4,8 +4,8 @@ import (
 	"context"
 	"os"
 
-	v2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
-	"github.com/aserto-dev/go-directory/aserto/directory/reader/v2"
+	dsc2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
+	dsr2 "github.com/aserto-dev/go-directory/aserto/directory/reader/v2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -16,8 +16,8 @@ func (c *Client) Save(ctx context.Context, file string) error {
 	// read object types
 	pageToken := ""
 	for {
-		req := &reader.GetObjectTypesRequest{
-			Page: &v2.PaginationRequest{Token: pageToken}}
+		req := &dsr2.GetObjectTypesRequest{
+			Page: &dsc2.PaginationRequest{Token: pageToken}}
 		resp, err := c.Reader.GetObjectTypes(ctx, req)
 		if err != nil {
 			return err
@@ -49,14 +49,14 @@ func (c *Client) Save(ctx context.Context, file string) error {
 	return nil
 }
 
-func (c *Client) getRelationTypes(ctx context.Context, data Manifest, object *v2.ObjectType) error {
+func (c *Client) getRelationTypes(ctx context.Context, data Manifest, object *dsc2.ObjectType) error {
 	token := ""
 	objRel := make(ObjectRelation, 0)
 
 	for {
-		relReq := &reader.GetRelationTypesRequest{
-			Param: &v2.ObjectTypeIdentifier{Name: &object.Name},
-			Page:  &v2.PaginationRequest{Token: token},
+		relReq := &dsr2.GetRelationTypesRequest{
+			Param: &dsc2.ObjectTypeIdentifier{Name: &object.Name},
+			Page:  &dsc2.PaginationRequest{Token: token},
 		}
 		resp, err := c.Reader.GetRelationTypes(ctx, relReq)
 		if err != nil {

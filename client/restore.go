@@ -11,8 +11,8 @@ import (
 
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
-	dsc "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
-	dsi "github.com/aserto-dev/go-directory/aserto/directory/importer/v2"
+	dsc2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
+	dsi2 "github.com/aserto-dev/go-directory/aserto/directory/importer/v2"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -47,7 +47,7 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 	return g.Wait()
 }
 
-func (c *Client) receiver(stream dsi.Importer_ImportClient) func() error {
+func (c *Client) receiver(stream dsi2.Importer_ImportClient) func() error {
 	return func() error {
 		for {
 			_, err := stream.Recv()
@@ -62,7 +62,7 @@ func (c *Client) receiver(stream dsi.Importer_ImportClient) func() error {
 	}
 }
 
-func (c *Client) restoreHandler(stream dsi.Importer_ImportClient, tr *tar.Reader, ctr *counter.Counter) func() error {
+func (c *Client) restoreHandler(stream dsi2.Importer_ImportClient, tr *tar.Reader, ctr *counter.Counter) func() error {
 	objectTypesCounter := ctr.ObjectTypes()
 	permissionsCounter := ctr.Permissions()
 	relationTypesCounter := ctr.RelationTypes()
@@ -129,10 +129,10 @@ func (c *Client) restoreHandler(stream dsi.Importer_ImportClient, tr *tar.Reader
 	}
 }
 
-func (c *Client) loadObjectTypes(stream dsi.Importer_ImportClient, objTypes *js.Reader, ctr *counter.Item) error {
+func (c *Client) loadObjectTypes(stream dsi2.Importer_ImportClient, objTypes *js.Reader, ctr *counter.Item) error {
 	defer objTypes.Close()
 
-	var m dsc.ObjectType
+	var m dsc2.ObjectType
 
 	for {
 		err := objTypes.Read(&m)
@@ -143,9 +143,9 @@ func (c *Client) loadObjectTypes(stream dsi.Importer_ImportClient, objTypes *js.
 			return err
 		}
 
-		if err := stream.Send(&dsi.ImportRequest{
-			OpCode: dsi.Opcode_OPCODE_SET,
-			Msg: &dsi.ImportRequest_ObjectType{
+		if err := stream.Send(&dsi2.ImportRequest{
+			OpCode: dsi2.Opcode_OPCODE_SET,
+			Msg: &dsi2.ImportRequest_ObjectType{
 				ObjectType: &m,
 			},
 		}); err != nil {
@@ -158,10 +158,10 @@ func (c *Client) loadObjectTypes(stream dsi.Importer_ImportClient, objTypes *js.
 	return nil
 }
 
-func (c *Client) loadPermissions(stream dsi.Importer_ImportClient, permissions *js.Reader, ctr *counter.Item) error {
+func (c *Client) loadPermissions(stream dsi2.Importer_ImportClient, permissions *js.Reader, ctr *counter.Item) error {
 	defer permissions.Close()
 
-	var m dsc.Permission
+	var m dsc2.Permission
 
 	for {
 		err := permissions.Read(&m)
@@ -172,9 +172,9 @@ func (c *Client) loadPermissions(stream dsi.Importer_ImportClient, permissions *
 			return err
 		}
 
-		if err := stream.Send(&dsi.ImportRequest{
-			OpCode: dsi.Opcode_OPCODE_SET,
-			Msg: &dsi.ImportRequest_Permission{
+		if err := stream.Send(&dsi2.ImportRequest{
+			OpCode: dsi2.Opcode_OPCODE_SET,
+			Msg: &dsi2.ImportRequest_Permission{
 				Permission: &m,
 			},
 		}); err != nil {
@@ -187,10 +187,10 @@ func (c *Client) loadPermissions(stream dsi.Importer_ImportClient, permissions *
 	return nil
 }
 
-func (c *Client) loadRelationTypes(stream dsi.Importer_ImportClient, relTypes *js.Reader, ctr *counter.Item) error {
+func (c *Client) loadRelationTypes(stream dsi2.Importer_ImportClient, relTypes *js.Reader, ctr *counter.Item) error {
 	defer relTypes.Close()
 
-	var m dsc.RelationType
+	var m dsc2.RelationType
 
 	for {
 		err := relTypes.Read(&m)
@@ -201,9 +201,9 @@ func (c *Client) loadRelationTypes(stream dsi.Importer_ImportClient, relTypes *j
 			return err
 		}
 
-		if err := stream.Send(&dsi.ImportRequest{
-			OpCode: dsi.Opcode_OPCODE_SET,
-			Msg: &dsi.ImportRequest_RelationType{
+		if err := stream.Send(&dsi2.ImportRequest{
+			OpCode: dsi2.Opcode_OPCODE_SET,
+			Msg: &dsi2.ImportRequest_RelationType{
 				RelationType: &m,
 			},
 		}); err != nil {
@@ -216,10 +216,10 @@ func (c *Client) loadRelationTypes(stream dsi.Importer_ImportClient, relTypes *j
 	return nil
 }
 
-func (c *Client) loadObjects(stream dsi.Importer_ImportClient, objects *js.Reader, ctr *counter.Item) error {
+func (c *Client) loadObjects(stream dsi2.Importer_ImportClient, objects *js.Reader, ctr *counter.Item) error {
 	defer objects.Close()
 
-	var m dsc.Object
+	var m dsc2.Object
 
 	for {
 		err := objects.Read(&m)
@@ -230,9 +230,9 @@ func (c *Client) loadObjects(stream dsi.Importer_ImportClient, objects *js.Reade
 			return err
 		}
 
-		if err := stream.Send(&dsi.ImportRequest{
-			OpCode: dsi.Opcode_OPCODE_SET,
-			Msg: &dsi.ImportRequest_Object{
+		if err := stream.Send(&dsi2.ImportRequest{
+			OpCode: dsi2.Opcode_OPCODE_SET,
+			Msg: &dsi2.ImportRequest_Object{
 				Object: &m,
 			},
 		}); err != nil {
@@ -244,10 +244,10 @@ func (c *Client) loadObjects(stream dsi.Importer_ImportClient, objects *js.Reade
 	return nil
 }
 
-func (c *Client) loadRelations(stream dsi.Importer_ImportClient, relations *js.Reader, ctr *counter.Item) error {
+func (c *Client) loadRelations(stream dsi2.Importer_ImportClient, relations *js.Reader, ctr *counter.Item) error {
 	defer relations.Close()
 
-	var m dsc.Relation
+	var m dsc2.Relation
 
 	for {
 		err := relations.Read(&m)
@@ -258,9 +258,9 @@ func (c *Client) loadRelations(stream dsi.Importer_ImportClient, relations *js.R
 			return err
 		}
 
-		if err := stream.Send(&dsi.ImportRequest{
-			OpCode: dsi.Opcode_OPCODE_SET,
-			Msg: &dsi.ImportRequest_Relation{
+		if err := stream.Send(&dsi2.ImportRequest{
+			OpCode: dsi2.Opcode_OPCODE_SET,
+			Msg: &dsi2.ImportRequest_Relation{
 				Relation: &m,
 			},
 		}); err != nil {

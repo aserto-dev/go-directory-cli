@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	v2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
-	"github.com/aserto-dev/go-directory/aserto/directory/reader/v2"
-	"github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
+	dsc2 "github.com/aserto-dev/go-directory/aserto/directory/common/v2"
+	dsr2 "github.com/aserto-dev/go-directory/aserto/directory/reader/v2"
+	dsw2 "github.com/aserto-dev/go-directory/aserto/directory/writer/v2"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -133,14 +133,14 @@ func (c *Client) updateRelationTypes(ctx context.Context, manifest Manifest) err
 }
 
 // get  object type.
-func (c *Client) getObjectType(ctx context.Context, objectType string) (*v2.ObjectType, error) {
-	resp, err := c.Reader.GetObjectType(ctx, &reader.GetObjectTypeRequest{
-		Param: &v2.ObjectTypeIdentifier{
+func (c *Client) getObjectType(ctx context.Context, objectType string) (*dsc2.ObjectType, error) {
+	resp, err := c.Reader.GetObjectType(ctx, &dsr2.GetObjectTypeRequest{
+		Param: &dsc2.ObjectTypeIdentifier{
 			Name: proto.String(objectType),
 		}})
 
 	if err != nil {
-		return &v2.ObjectType{}, err
+		return &dsc2.ObjectType{}, err
 	}
 
 	return resp.Result, nil
@@ -148,8 +148,8 @@ func (c *Client) getObjectType(ctx context.Context, objectType string) (*v2.Obje
 
 // get and set object type.
 func (c *Client) getSetObjectType(ctx context.Context, objectType string) error {
-	req := &writer.SetObjectTypeRequest{
-		ObjectType: &v2.ObjectType{
+	req := &dsw2.SetObjectTypeRequest{
+		ObjectType: &dsc2.ObjectType{
 			Name:        objectType,
 			DisplayName: objectType,
 		}}
@@ -170,15 +170,15 @@ func (c *Client) getSetObjectType(ctx context.Context, objectType string) error 
 }
 
 // get relation type.
-func (c *Client) getRelationType(ctx context.Context, objectType, relationType string) (*v2.RelationType, error) {
-	resp, err := c.Reader.GetRelationType(ctx, &reader.GetRelationTypeRequest{
-		Param: &v2.RelationTypeIdentifier{
+func (c *Client) getRelationType(ctx context.Context, objectType, relationType string) (*dsc2.RelationType, error) {
+	resp, err := c.Reader.GetRelationType(ctx, &dsr2.GetRelationTypeRequest{
+		Param: &dsc2.RelationTypeIdentifier{
 			ObjectType: proto.String(objectType),
 			Name:       proto.String(relationType),
 		}})
 
 	if err != nil {
-		return &v2.RelationType{}, err
+		return &dsc2.RelationType{}, err
 	}
 
 	return resp.Result, nil
@@ -186,8 +186,8 @@ func (c *Client) getRelationType(ctx context.Context, objectType, relationType s
 
 // get set relation type.
 func (c *Client) getSetRelationType(ctx context.Context, objectType, relationType string, unions, permissions []string) error {
-	req := &writer.SetRelationTypeRequest{
-		RelationType: &v2.RelationType{
+	req := &dsw2.SetRelationTypeRequest{
+		RelationType: &dsc2.RelationType{
 			ObjectType:  objectType,
 			Name:        relationType,
 			DisplayName: objectType + ":" + relationType,
@@ -217,22 +217,22 @@ func (c *Client) getSetRelationType(ctx context.Context, objectType, relationTyp
 }
 
 // get permission.
-func (c *Client) getPermission(ctx context.Context, permission string) (*v2.Permission, error) {
-	resp, err := c.Reader.GetPermission(ctx, &reader.GetPermissionRequest{
-		Param: &v2.PermissionIdentifier{
+func (c *Client) getPermission(ctx context.Context, permission string) (*dsc2.Permission, error) {
+	resp, err := c.Reader.GetPermission(ctx, &dsr2.GetPermissionRequest{
+		Param: &dsc2.PermissionIdentifier{
 			Name: proto.String(permission),
 		}})
 
 	if err != nil {
-		return &v2.Permission{}, err
+		return &dsc2.Permission{}, err
 	}
 	return resp.Result, nil
 }
 
 // get set permission.
 func (c *Client) getSetPermission(ctx context.Context, permission string) error {
-	req := &writer.SetPermissionRequest{
-		Permission: &v2.Permission{
+	req := &dsw2.SetPermissionRequest{
+		Permission: &dsc2.Permission{
 			Name:        permission,
 			DisplayName: permission,
 		}}
