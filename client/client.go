@@ -32,30 +32,30 @@ const (
 
 type Client struct {
 	conn      grpc.ClientConnInterface
-	Writer    dsw2.WriterClient
-	Exporter  dse2.ExporterClient
-	Importer  dsi2.ImporterClient
-	Reader    dsr2.ReaderClient
-	Model3    dsm3.ModelClient
-	Reader3   dsr3.ReaderClient
-	Writer3   dsw3.WriterClient
-	Importer3 dsi3.ImporterClient
-	Exporter3 dse3.ExporterClient
+	Writer2   dsw2.WriterClient
+	Exporter2 dse2.ExporterClient
+	Importer2 dsi2.ImporterClient
+	Reader2   dsr2.ReaderClient
+	Model     dsm3.ModelClient
+	Reader    dsr3.ReaderClient
+	Writer    dsw3.WriterClient
+	Importer  dsi3.ImporterClient
+	Exporter  dse3.ExporterClient
 	UI        *clui.UI
 }
 
 func New(conn grpc.ClientConnInterface, ui *clui.UI) (*Client, error) {
 	c := Client{
 		conn:      conn,
-		Writer:    dsw2.NewWriterClient(conn),
-		Exporter:  dse2.NewExporterClient(conn),
-		Importer:  dsi2.NewImporterClient(conn),
-		Reader:    dsr2.NewReaderClient(conn),
-		Model3:    dsm3.NewModelClient(conn),
-		Reader3:   dsr3.NewReaderClient(conn),
-		Writer3:   dsw3.NewWriterClient(conn),
-		Importer3: dsi3.NewImporterClient(conn),
-		Exporter3: dse3.NewExporterClient(conn),
+		Writer2:   dsw2.NewWriterClient(conn),
+		Exporter2: dse2.NewExporterClient(conn),
+		Importer2: dsi2.NewImporterClient(conn),
+		Reader2:   dsr2.NewReaderClient(conn),
+		Model:     dsm3.NewModelClient(conn),
+		Reader:    dsr3.NewReaderClient(conn),
+		Writer:    dsw3.NewWriterClient(conn),
+		Importer:  dsi3.NewImporterClient(conn),
+		Exporter:  dse3.NewExporterClient(conn),
 		UI:        ui,
 	}
 	return &c, nil

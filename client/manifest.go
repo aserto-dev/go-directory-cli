@@ -11,7 +11,7 @@ import (
 )
 
 func (c *Client) GetManifest(ctx context.Context) (io.Reader, error) {
-	stream, err := c.Model3.GetManifest(ctx, &dsm3.GetManifestRequest{Empty: &emptypb.Empty{}})
+	stream, err := c.Model.GetManifest(ctx, &dsm3.GetManifestRequest{Empty: &emptypb.Empty{}})
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *Client) GetManifest(ctx context.Context) (io.Reader, error) {
 const blockSize = 1024 * 64
 
 func (c *Client) SetManifest(ctx context.Context, r io.Reader) error {
-	stream, err := c.Model3.SetManifest(ctx)
+	stream, err := c.Model.SetManifest(ctx)
 	if err != nil {
 		return err
 	}
@@ -81,6 +81,6 @@ func (c *Client) SetManifest(ctx context.Context, r io.Reader) error {
 }
 
 func (c *Client) DeleteManifest(ctx context.Context) error {
-	_, err := c.Model3.DeleteManifest(ctx, &dsm3.DeleteManifestRequest{Empty: &emptypb.Empty{}})
+	_, err := c.Model.DeleteManifest(ctx, &dsm3.DeleteManifestRequest{Empty: &emptypb.Empty{}})
 	return err
 }

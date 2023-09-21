@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/aserto-dev/clui v0.8.2
-	github.com/aserto-dev/go-directory v0.21.8-0.20230817201146-72f44e043624
+	github.com/aserto-dev/go-directory v0.21.8-0.20230921154147-4f4347fa32c6
 	github.com/magefile/mage v1.15.0
 	github.com/mattn/go-isatty v0.0.19
 	github.com/pkg/errors v0.9.1

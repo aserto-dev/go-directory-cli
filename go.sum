@@ -6,6 +6,8 @@ github.com/aserto-dev/clui v0.8.2 h1:QPyAsKnZrafSfPMWPni6w5JyZUJOThbqVmHWWxWPi+M
 github.com/aserto-dev/clui v0.8.2/go.mod h1:b3hhCepxBKdbeaIwYXRtlt07jnn7tgnfF4onVOwSEL4=
 github.com/aserto-dev/go-directory v0.21.8-0.20230817201146-72f44e043624 h1:Ilds2/k3tHryhrh/4GMDf12jrExhkrenvHh7cPSS+2c=
 github.com/aserto-dev/go-directory v0.21.8-0.20230817201146-72f44e043624/go.mod h1:ZsHSXALiP6F49/+zKDZP6GIcAWyYX95lkSVxM+8Jwno=
+github.com/aserto-dev/go-directory v0.21.8-0.20230921154147-4f4347fa32c6 h1:oBWgBOa85P+WgjuteFt6U1KPrOeguWPyxDpHs09zHEc=
+github.com/aserto-dev/go-directory v0.21.8-0.20230921154147-4f4347fa32c6/go.mod h1:ZsHSXALiP6F49/+zKDZP6GIcAWyYX95lkSVxM+8Jwno=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/fatih/color v1.15.0 h1:kOqh6YHBtK8aywxGerMG2Eq3H6Qgoqeo13Bk2Mv/nBs=
 github.com/fatih/color v1.15.0/go.mod h1:0h5ZqXfHYED7Bhv2ZJamyIOUej9KtShiJESRwBDUSsw=

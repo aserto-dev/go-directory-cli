@@ -134,7 +134,7 @@ func (c *Client) updateRelationTypes(ctx context.Context, manifest Manifest) err
 
 // get  object type.
 func (c *Client) getObjectType(ctx context.Context, objectType string) (*dsc2.ObjectType, error) {
-	resp, err := c.Reader.GetObjectType(ctx, &dsr2.GetObjectTypeRequest{
+	resp, err := c.Reader2.GetObjectType(ctx, &dsr2.GetObjectTypeRequest{
 		Param: &dsc2.ObjectTypeIdentifier{
 			Name: proto.String(objectType),
 		}})
@@ -164,14 +164,14 @@ func (c *Client) getSetObjectType(ctx context.Context, objectType string) error 
 		req.ObjectType.Hash = resp.Hash
 	}
 
-	_, err = c.Writer.SetObjectType(ctx, req)
+	_, err = c.Writer2.SetObjectType(ctx, req)
 
 	return err
 }
 
 // get relation type.
 func (c *Client) getRelationType(ctx context.Context, objectType, relationType string) (*dsc2.RelationType, error) {
-	resp, err := c.Reader.GetRelationType(ctx, &dsr2.GetRelationTypeRequest{
+	resp, err := c.Reader2.GetRelationType(ctx, &dsr2.GetRelationTypeRequest{
 		Param: &dsc2.RelationTypeIdentifier{
 			ObjectType: proto.String(objectType),
 			Name:       proto.String(relationType),
@@ -211,14 +211,14 @@ func (c *Client) getSetRelationType(ctx context.Context, objectType, relationTyp
 		req.RelationType.Hash = resp.Hash
 	}
 
-	_, err = c.Writer.SetRelationType(ctx, req)
+	_, err = c.Writer2.SetRelationType(ctx, req)
 
 	return err
 }
 
 // get permission.
 func (c *Client) getPermission(ctx context.Context, permission string) (*dsc2.Permission, error) {
-	resp, err := c.Reader.GetPermission(ctx, &dsr2.GetPermissionRequest{
+	resp, err := c.Reader2.GetPermission(ctx, &dsr2.GetPermissionRequest{
 		Param: &dsc2.PermissionIdentifier{
 			Name: proto.String(permission),
 		}})
@@ -247,7 +247,7 @@ func (c *Client) getSetPermission(ctx context.Context, permission string) error 
 		req.Permission.Hash = resp.Hash
 	}
 
-	_, err = c.Writer.SetPermission(ctx, req)
+	_, err = c.Writer2.SetPermission(ctx, req)
 
 	return err
 }

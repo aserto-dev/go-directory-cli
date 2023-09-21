@@ -18,7 +18,7 @@ func (c *Client) Save(ctx context.Context, file string) error {
 	for {
 		req := &dsr2.GetObjectTypesRequest{
 			Page: &dsc2.PaginationRequest{Token: pageToken}}
-		resp, err := c.Reader.GetObjectTypes(ctx, req)
+		resp, err := c.Reader2.GetObjectTypes(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -58,15 +58,15 @@ func (c *Client) getRelationTypes(ctx context.Context, data Manifest, object *ds
 			Param: &dsc2.ObjectTypeIdentifier{Name: &object.Name},
 			Page:  &dsc2.PaginationRequest{Token: token},
 		}
-		resp, err := c.Reader.GetRelationTypes(ctx, relReq)
+		resp, err := c.Reader2.GetRelationTypes(ctx, relReq)
 		if err != nil {
 			return err
 		}
 
 		for _, relationType := range resp.Results {
 			rels := make(Relation, 0)
-			rels["union"] = relationType.Unions
-			rels["permissions"] = relationType.Permissions
+			rels["union"] = relationType.Unions            //nolint: gosec
+			rels["permissions"] = relationType.Permissions //nolint: gosec
 			objRel[relationType.Name] = rels
 		}
 

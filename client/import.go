@@ -6,7 +6,7 @@ import (
 
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
-	dsi2 "github.com/aserto-dev/go-directory/aserto/directory/importer/v2"
+	dsi3 "github.com/aserto-dev/go-directory/aserto/directory/importer/v3"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
@@ -28,7 +28,7 @@ func (c *Client) Import(ctx context.Context, files []string) error {
 	return g.Wait()
 }
 
-func (c *Client) importHandler(stream dsi2.Importer_ImportClient, files []string, ctr *counter.Counter) func() error {
+func (c *Client) importHandler(stream dsi3.Importer_ImportClient, files []string, ctr *counter.Counter) func() error {
 	return func() error {
 		for _, file := range files {
 			if err := c.importFile(stream, file, ctr); err != nil {
@@ -44,7 +44,7 @@ func (c *Client) importHandler(stream dsi2.Importer_ImportClient, files []string
 	}
 }
 
-func (c *Client) importFile(stream dsi2.Importer_ImportClient, file string, ctr *counter.Counter) error {
+func (c *Client) importFile(stream dsi3.Importer_ImportClient, file string, ctr *counter.Counter) error {
 	r, err := os.Open(file)
 	if err != nil {
 		return errors.Wrapf(err, "failed to open file: [%s]", file)

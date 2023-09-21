@@ -6,13 +6,13 @@ import (
 
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
-	dse2 "github.com/aserto-dev/go-directory/aserto/directory/exporter/v2"
+	dse3 "github.com/aserto-dev/go-directory/aserto/directory/exporter/v3"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) error {
-	stream, err := c.Exporter.Export(ctx, &dse2.ExportRequest{
-		Options:   uint32(dse2.Option_OPTION_DATA),
+	stream, err := c.Exporter.Export(ctx, &dse3.ExportRequest{
+		Options:   uint32(dse3.Option_OPTION_DATA),
 		StartFrom: &timestamppb.Timestamp{},
 	})
 	if err != nil {
@@ -45,11 +45,11 @@ func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) 
 		}
 
 		switch m := msg.Msg.(type) {
-		case *dse2.ExportResponse_Object:
+		case *dse3.ExportResponse_Object:
 			err = objects.Write(m.Object)
 			objectsCounter.Incr().Print(c.UI.Output())
 
-		case *dse2.ExportResponse_Relation:
+		case *dse3.ExportResponse_Relation:
 			err = relations.Write(m.Relation)
 			relationsCounter.Incr().Print(c.UI.Output())
 
