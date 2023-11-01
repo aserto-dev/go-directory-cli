@@ -87,6 +87,8 @@ func (c *Counter) Relations() *Item {
 	return c.relations
 }
 
+const unknownFieldsMsg string = " WARNING data contained unknown fields"
+
 func (c *Counter) Print(w io.Writer) {
 	if isatty.IsTerminal(os.Stdout.Fd()) {
 		fmt.Fprintf(w, "\033[2K\r")
@@ -113,7 +115,7 @@ func (c *Counter) Print(w io.Writer) {
 	if c.objects != nil {
 		msg := ""
 		if c.objects.skipped > 0 {
-			msg = " WARNING data contained unknown fields"
+			msg = unknownFieldsMsg
 		}
 		fmt.Fprintf(w, "%15s %d%s\n", objects, c.objects.value, msg)
 	} else {
@@ -123,7 +125,7 @@ func (c *Counter) Print(w io.Writer) {
 	if c.relations != nil {
 		msg := ""
 		if c.objects.skipped > 0 {
-			msg = " WARNING data contained unknown fields"
+			msg = unknownFieldsMsg
 		}
 		fmt.Fprintf(w, "%15s %d%s\n", relations, c.relations.value, msg)
 	} else {

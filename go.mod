@@ -2,7 +2,7 @@ module github.com/aserto-dev/go-directory-cli
 
 go 1.19
 
-replace github.com/aserto-dev/go-directory => ../go-directory
+// replace github.com/aserto-dev/go-directory => ../go-directory
 
 require (
 	github.com/aserto-dev/clui v0.8.3
