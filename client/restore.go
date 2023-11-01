@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
@@ -97,9 +98,6 @@ func (c *Client) restoreHandler(stream dsi3.Importer_ImportClient, tr *tar.Reade
 				if err := c.loadRelations(stream, r, relationsCounter); err != nil {
 					return err
 				}
-
-			default:
-				break
 			}
 		}
 
@@ -121,7 +119,12 @@ func (c *Client) loadObjects(stream dsi3.Importer_ImportClient, objects *js.Read
 		if err == io.EOF {
 			break
 		}
+
 		if err != nil {
+			if strings.Contains(err.Error(), "unknown field") {
+				ctr.Skip()
+				continue
+			}
 			return err
 		}
 
@@ -150,6 +153,10 @@ func (c *Client) loadRelations(stream dsi3.Importer_ImportClient, relations *js.
 			break
 		}
 		if err != nil {
+			if strings.Contains(err.Error(), "unknown field") {
+				ctr.Skip()
+				continue
+			}
 			return err
 		}
 
