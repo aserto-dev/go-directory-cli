@@ -1,9 +1,10 @@
-package client
+package v3
 
 import (
 	"context"
 	"os"
 
+	"github.com/aserto-dev/go-directory-cli/client/x"
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
 	dsi3 "github.com/aserto-dev/go-directory/aserto/directory/importer/v3"
@@ -60,12 +61,12 @@ func (c *Client) importFile(stream dsi3.Importer_ImportClient, file string, ctr 
 
 	objectType := reader.GetObjectType()
 	switch objectType {
-	case ObjectsStr:
+	case x.ObjectsStr:
 		if err := c.loadObjects(stream, reader, ctr.Objects()); err != nil {
 			return err
 		}
 
-	case RelationsStr:
+	case x.RelationsStr:
 		if err := c.loadRelations(stream, reader, ctr.Relations()); err != nil {
 			return err
 		}

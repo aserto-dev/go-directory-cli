@@ -1,6 +1,6 @@
 module github.com/aserto-dev/go-directory-cli
 
-go 1.19
+go 1.20
 
 // replace github.com/aserto-dev/go-directory => ../go-directory
 

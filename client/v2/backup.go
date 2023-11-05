@@ -1,4 +1,4 @@
-package client
+package v2
 
 import (
 	"archive/tar"
@@ -8,16 +8,17 @@ import (
 	"os"
 	"path"
 
+	"github.com/aserto-dev/go-directory-cli/client/x"
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
-	dse3 "github.com/aserto-dev/go-directory/aserto/directory/exporter/v3"
+	dse2 "github.com/aserto-dev/go-directory/aserto/directory/exporter/v2"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (c *Client) Backup(ctx context.Context, file string) error {
 
-	stream, err := c.Exporter.Export(ctx, &dse3.ExportRequest{
-		Options:   uint32(dse3.Option_OPTION_DATA),
+	stream, err := c.Exporter.Export(ctx, &dse2.ExportRequest{
+		Options:   uint32(dse2.Option_OPTION_DATA),
 		StartFrom: &timestamppb.Timestamp{},
 	})
 	if err != nil {
@@ -62,8 +63,8 @@ func (c *Client) Backup(ctx context.Context, file string) error {
 		tw.Close()
 	}()
 
-	_ = addToArchive(tw, path.Join(dirPath, ObjectsFileName))
-	_ = addToArchive(tw, path.Join(dirPath, RelationsFileName))
+	_ = addToArchive(tw, path.Join(dirPath, x.ObjectsFileName))
+	_ = addToArchive(tw, path.Join(dirPath, x.RelationsFileName))
 
 	return nil
 }
@@ -96,14 +97,14 @@ func addToArchive(tw *tar.Writer, filename string) error {
 	return nil
 }
 
-func (c *Client) createBackupFiles(stream dse3.Exporter_ExportClient, dirPath string) error {
-	objects, err := js.NewWriter(path.Join(dirPath, ObjectsFileName), ObjectsStr)
+func (c *Client) createBackupFiles(stream dse2.Exporter_ExportClient, dirPath string) error {
+	objects, err := js.NewWriter(path.Join(dirPath, x.ObjectsFileName), x.ObjectsStr)
 	if err != nil {
 		return err
 	}
 	defer objects.Close()
 
-	relations, err := js.NewWriter(path.Join(dirPath, RelationsFileName), RelationsStr)
+	relations, err := js.NewWriter(path.Join(dirPath, x.RelationsFileName), x.RelationsStr)
 	if err != nil {
 		return err
 	}
@@ -123,11 +124,11 @@ func (c *Client) createBackupFiles(stream dse3.Exporter_ExportClient, dirPath st
 		}
 
 		switch m := msg.Msg.(type) {
-		case *dse3.ExportResponse_Object:
+		case *dse2.ExportResponse_Object:
 			err = objects.Write(m.Object)
 			objectsCounter.Incr().Print(c.UI.Output())
 
-		case *dse3.ExportResponse_Relation:
+		case *dse2.ExportResponse_Relation:
 			err = relations.Write(m.Relation)
 			relationsCounter.Incr().Print(c.UI.Output())
 

@@ -1,4 +1,4 @@
-package client
+package v3
 
 import (
 	"archive/tar"
@@ -10,6 +10,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/aserto-dev/go-directory-cli/client/x"
 	"github.com/aserto-dev/go-directory-cli/counter"
 	"github.com/aserto-dev/go-directory-cli/js"
 	dsc3 "github.com/aserto-dev/go-directory/aserto/directory/common/v3"
@@ -89,12 +90,12 @@ func (c *Client) restoreHandler(stream dsi3.Importer_ImportClient, tr *tar.Reade
 
 			name := path.Clean(header.Name)
 			switch name {
-			case ObjectsFileName:
+			case x.ObjectsFileName:
 				if err := c.loadObjects(stream, r, objectsCounter); err != nil {
 					return err
 				}
 
-			case RelationsFileName:
+			case x.RelationsFileName:
 				if err := c.loadRelations(stream, r, relationsCounter); err != nil {
 					return err
 				}
