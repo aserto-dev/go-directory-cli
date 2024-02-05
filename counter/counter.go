@@ -10,20 +10,14 @@ import (
 )
 
 const (
-	objectTypes   = "object types"
-	permissions   = "permissions"
-	relationTypes = "relation types"
-	objects       = "objects"
-	relations     = "relations"
-	skipped       = "skipped"
+	objects   = "objects"
+	relations = "relations"
+	skipped   = "skipped"
 )
 
 type Counter struct {
-	objectTypes   *Item
-	permissions   *Item
-	relationTypes *Item
-	objects       *Item
-	relations     *Item
+	objects   *Item
+	relations *Item
 }
 
 func New() *Counter {
@@ -52,27 +46,6 @@ func (c *Item) Print(w io.Writer) {
 	}
 }
 
-func (c *Counter) ObjectTypes() *Item {
-	if c.objectTypes == nil {
-		c.objectTypes = &Item{Name: objectTypes}
-	}
-	return c.objectTypes
-}
-
-func (c *Counter) Permissions() *Item {
-	if c.permissions == nil {
-		c.permissions = &Item{Name: permissions}
-	}
-	return c.permissions
-}
-
-func (c *Counter) RelationTypes() *Item {
-	if c.relationTypes == nil {
-		c.relationTypes = &Item{Name: relationTypes}
-	}
-	return c.relationTypes
-}
-
 func (c *Counter) Objects() *Item {
 	if c.objects == nil {
 		c.objects = &Item{Name: objects}
@@ -94,24 +67,6 @@ func (c *Counter) Print(w io.Writer) {
 		fmt.Fprintf(w, "\033[2K\r")
 	}
 
-	if c.objectTypes != nil {
-		fmt.Fprintf(w, "%15s %d\n", objectTypes, c.objectTypes.value)
-	} else {
-		fmt.Fprintf(w, "%15s %s\n", objectTypes, skipped)
-	}
-
-	if c.permissions != nil {
-		fmt.Fprintf(w, "%15s %d\n", permissions, c.permissions.value)
-	} else {
-		fmt.Fprintf(w, "%15s %s\n", permissions, skipped)
-	}
-
-	if c.relationTypes != nil {
-		fmt.Fprintf(w, "%15s %d\n", relationTypes, c.relationTypes.value)
-	} else {
-		fmt.Fprintf(w, "%15s %s\n", relationTypes, skipped)
-	}
-
 	if c.objects != nil {
 		msg := ""
 		if c.objects.skipped > 0 {
@@ -124,7 +79,7 @@ func (c *Counter) Print(w io.Writer) {
 
 	if c.relations != nil {
 		msg := ""
-		if c.objects.skipped > 0 {
+		if c.relations.skipped > 0 {
 			msg = unknownFieldsMsg
 		}
 		fmt.Fprintf(w, "%15s %d%s\n", relations, c.relations.value, msg)
