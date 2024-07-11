@@ -2,9 +2,10 @@ package js
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
+	"os"
 
-	"github.com/aserto-dev/clui"
 	"github.com/aserto-dev/go-directory/pkg/pb"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
@@ -14,10 +15,9 @@ type Reader struct {
 	dec     *json.Decoder
 	first   bool
 	rootKey string
-	ui      *clui.UI
 }
 
-func NewReader(r io.Reader, ui *clui.UI) (*Reader, error) {
+func NewReader(r io.Reader) (*Reader, error) {
 	dec := json.NewDecoder(r)
 
 	// advance reader to start token
@@ -51,7 +51,6 @@ func NewReader(r io.Reader, ui *clui.UI) (*Reader, error) {
 				dec:     dec,
 				first:   false,
 				rootKey: keyStr,
-				ui:      ui,
 			}, nil
 		}
 	}
@@ -84,7 +83,7 @@ func (r *Reader) Read(m proto.Message) error {
 			return err
 		}
 		if delim, ok := tok.(json.Delim); !ok && delim.String() != "}" {
-			r.ui.Problem().Msgf("detected addition data [%s] in file, ignoring.", tok)
+			fmt.Fprintf(os.Stderr, "detected addition data [%s] in file, ignoring.", tok)
 		}
 		return io.EOF
 	}

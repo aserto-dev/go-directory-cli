@@ -2,6 +2,7 @@ package v3
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/aserto-dev/go-directory-cli/client/x"
@@ -48,22 +49,22 @@ func (c *Client) Export(ctx context.Context, objectsFile, relationsFile string) 
 		switch m := msg.Msg.(type) {
 		case *dse3.ExportResponse_Object:
 			err = objects.Write(m.Object)
-			objectsCounter.Incr().Print(c.UI.Output())
+			objectsCounter.Incr().Print(c.Out())
 
 		case *dse3.ExportResponse_Relation:
 			err = relations.Write(m.Relation)
-			relationsCounter.Incr().Print(c.UI.Output())
+			relationsCounter.Incr().Print(c.Out())
 
 		default:
-			c.UI.Problem().Msg("unknown message type")
+			fmt.Fprintf(c.Err(), "unknown message type\n")
 		}
 
 		if err != nil {
-			c.UI.Problem().Msgf("err: %v", err)
+			fmt.Fprintf(c.Err(), "err: %v\n", err)
 		}
 	}
 
-	ctr.Print(c.UI.Output())
+	ctr.Print(c.Out())
 
 	return nil
 }

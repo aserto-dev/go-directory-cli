@@ -34,7 +34,7 @@ func (c *Client) Restore(ctx context.Context, file string) error {
 	tr := tar.NewReader(gz)
 
 	ctr := counter.New()
-	defer ctr.Print(c.UI.Output())
+	defer ctr.Print(c.Out())
 
 	g, iCtx := errgroup.WithContext(context.Background())
 	stream, err := c.Importer.Import(iCtx)
@@ -83,7 +83,7 @@ func (c *Client) restoreHandler(stream dsi3.Importer_ImportClient, tr *tar.Reade
 				continue
 			}
 
-			r, err := js.NewReader(tr, c.UI)
+			r, err := js.NewReader(tr)
 			if err != nil {
 				return err
 			}
@@ -137,7 +137,7 @@ func (c *Client) loadObjects(stream dsi3.Importer_ImportClient, objects *js.Read
 		}); err != nil {
 			return err
 		}
-		ctr.Incr().Print(c.UI.Output())
+		ctr.Incr().Print(c.Out())
 	}
 
 	return nil
@@ -170,7 +170,7 @@ func (c *Client) loadRelations(stream dsi3.Importer_ImportClient, relations *js.
 			return err
 		}
 
-		ctr.Incr().Print(c.UI.Output())
+		ctr.Incr().Print(c.Out())
 	}
 
 	return nil
