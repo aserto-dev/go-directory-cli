@@ -14,7 +14,7 @@ import (
 )
 
 type Client struct {
-	conn      grpc.ClientConnInterface
+	conn      *grpc.ClientConn
 	Model     dsm3.ModelClient
 	Reader    dsr3.ReaderClient
 	Writer    dsw3.WriterClient
@@ -25,7 +25,7 @@ type Client struct {
 	stderr    io.Writer
 }
 
-func New(conn grpc.ClientConnInterface, stdout, stderr io.Writer) (*Client, error) {
+func New(conn *grpc.ClientConn, stdout, stderr io.Writer) (*Client, error) {
 	c := Client{
 		conn:      conn,
 		Model:     dsm3.NewModelClient(conn),

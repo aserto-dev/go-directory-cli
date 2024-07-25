@@ -9,11 +9,11 @@ import (
 )
 
 type Client struct {
-	conn grpc.ClientConnInterface
+	conn *grpc.ClientConn
 	V3   *v3.Client
 }
 
-func New(conn grpc.ClientConnInterface, stdout, stderr io.Writer) (*Client, error) {
+func New(conn *grpc.ClientConn, stdout, stderr io.Writer) (*Client, error) {
 	dsc3, err := v3.New(conn, stdout, stderr)
 	if err != nil {
 		return nil, err
