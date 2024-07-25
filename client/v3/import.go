@@ -2,6 +2,7 @@ package v3
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/aserto-dev/go-directory-cli/client/x"
@@ -14,7 +15,7 @@ import (
 
 func (c *Client) Import(ctx context.Context, files []string) error {
 	ctr := counter.New()
-	defer ctr.Print(c.UI.Output())
+	defer ctr.Print(c.Out())
 
 	g, iCtx := errgroup.WithContext(context.Background())
 	stream, err := c.Importer.Import(iCtx)
@@ -52,9 +53,9 @@ func (c *Client) importFile(stream dsi3.Importer_ImportClient, file string, ctr 
 	}
 	defer r.Close()
 
-	reader, err := js.NewReader(r, c.UI)
+	reader, err := js.NewReader(r)
 	if err != nil || reader == nil {
-		c.UI.Problem().Msgf("Skipping file [%s]: [%s]", file, err.Error())
+		fmt.Fprintf(c.Err(), "Skipping file [%s]: [%s]\n", file, err.Error())
 		return nil
 	}
 	defer reader.Close()
@@ -72,7 +73,7 @@ func (c *Client) importFile(stream dsi3.Importer_ImportClient, file string, ctr 
 		}
 
 	default:
-		c.UI.Problem().Msgf("skipping file [%s] with object type [%s]", file, objectType)
+		fmt.Fprintf(c.Err(), "skipping file [%s] with object type [%s]\n", file, objectType)
 	}
 
 	return nil

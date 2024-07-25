@@ -1,7 +1,7 @@
 package v3
 
 import (
-	"github.com/aserto-dev/clui"
+	"io"
 
 	dsa3 "github.com/aserto-dev/go-directory/aserto/directory/assertion/v3"
 	dse3 "github.com/aserto-dev/go-directory/aserto/directory/exporter/v3"
@@ -14,17 +14,18 @@ import (
 )
 
 type Client struct {
-	conn      grpc.ClientConnInterface
+	conn      *grpc.ClientConn
 	Model     dsm3.ModelClient
 	Reader    dsr3.ReaderClient
 	Writer    dsw3.WriterClient
 	Importer  dsi3.ImporterClient
 	Exporter  dse3.ExporterClient
 	Assertion dsa3.AssertionClient
-	UI        *clui.UI
+	stdout    io.Writer
+	stderr    io.Writer
 }
 
-func New(conn grpc.ClientConnInterface, ui *clui.UI) (*Client, error) {
+func New(conn *grpc.ClientConn, stdout, stderr io.Writer) (*Client, error) {
 	c := Client{
 		conn:      conn,
 		Model:     dsm3.NewModelClient(conn),
@@ -33,7 +34,16 @@ func New(conn grpc.ClientConnInterface, ui *clui.UI) (*Client, error) {
 		Importer:  dsi3.NewImporterClient(conn),
 		Exporter:  dse3.NewExporterClient(conn),
 		Assertion: dsa3.NewAssertionClient(conn),
-		UI:        ui,
+		stdout:    stdout,
+		stderr:    stderr,
 	}
 	return &c, nil
+}
+
+func (c *Client) Out() io.Writer {
+	return c.stdout
+}
+
+func (c *Client) Err() io.Writer {
+	return c.stderr
 }

@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -16,7 +17,6 @@ import (
 )
 
 func (c *Client) Backup(ctx context.Context, file string) error {
-
 	stream, err := c.Exporter.Export(ctx, &dse3.ExportRequest{
 		Options:   uint32(dse3.Option_OPTION_DATA),
 		StartFrom: &timestamppb.Timestamp{},
@@ -34,7 +34,7 @@ func (c *Client) Backup(ctx context.Context, file string) error {
 	}()
 
 	dirPath := path.Join(tmpDir, "backup")
-	if err := os.MkdirAll(dirPath, 0700); err != nil {
+	if err := os.MkdirAll(dirPath, 0o700); err != nil {
 		return err
 	}
 
@@ -126,22 +126,22 @@ func (c *Client) createBackupFiles(stream dse3.Exporter_ExportClient, dirPath st
 		switch m := msg.Msg.(type) {
 		case *dse3.ExportResponse_Object:
 			err = objects.Write(m.Object)
-			objectsCounter.Incr().Print(c.UI.Output())
+			objectsCounter.Incr().Print(c.Out())
 
 		case *dse3.ExportResponse_Relation:
 			err = relations.Write(m.Relation)
-			relationsCounter.Incr().Print(c.UI.Output())
+			relationsCounter.Incr().Print(c.Out())
 
 		default:
-			c.UI.Exclamation().Msg("Unknown message type")
+			fmt.Fprintf(c.Out(), "Unknown message type\n")
 		}
 
 		if err != nil {
-			c.UI.Problem().Msgf("Error: %v", err)
+			fmt.Fprintf(c.Err(), "Error: %v\n", err)
 		}
 	}
 
-	ctr.Print(c.UI.Output())
+	ctr.Print(c.Out())
 
 	return nil
 }

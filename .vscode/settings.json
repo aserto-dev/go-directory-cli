@@ -1,7 +1,6 @@
 {
     "cSpell.words": [
         "aserto",
-        "clui",
         "emptypb",
         "errgroup",
         "GOPRIVATE",
@@ -12,6 +11,6 @@
         "rels",
         "timestamppb",
         "Typeflag",
-        "Wrapf"
+        "wrapf"
     ]
 }

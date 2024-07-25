@@ -1,20 +1,20 @@
 package client
 
 import (
-	"github.com/aserto-dev/clui"
+	"io"
+
 	v3 "github.com/aserto-dev/go-directory-cli/client/v3"
 
 	"google.golang.org/grpc"
 )
 
 type Client struct {
-	conn grpc.ClientConnInterface
+	conn *grpc.ClientConn
 	V3   *v3.Client
-	UI   *clui.UI
 }
 
-func New(conn grpc.ClientConnInterface, ui *clui.UI) (*Client, error) {
-	dsc3, err := v3.New(conn, ui)
+func New(conn *grpc.ClientConn, stdout, stderr io.Writer) (*Client, error) {
+	dsc3, err := v3.New(conn, stdout, stderr)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,6 @@ func New(conn grpc.ClientConnInterface, ui *clui.UI) (*Client, error) {
 	c := Client{
 		conn: conn,
 		V3:   dsc3,
-		UI:   ui,
 	}
 	return &c, nil
 }
